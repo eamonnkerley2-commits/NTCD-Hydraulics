@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NTCD Hydraulics Calculator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:#0f1923;color:#dce6f0;min-height:100vh;font-size:14px}
+header{background:#1a2535;border-bottom:3px solid #e6a817;padding:0 20px;display:flex;align-items:center;gap:14px;height:56px;position:sticky;top:0;z-index:100}
+.logo{font-size:19px;font-weight:700;letter-spacing:3px;color:#e6a817;text-transform:uppercase;font-family:'Courier New',monospace}
+.logo-sub{font-size:10px;color:#8fa0b0;letter-spacing:1px;text-transform:uppercase;margin-top:-2px}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.hdr-badge{background:#e6a817;color:#0f1923;font-size:9px;font-weight:700;padding:2px 8px;letter-spacing:2px;border-radius:2px}
+.print-btn{background:#253040;color:#e6a817;border:1px solid #e6a817;border-radius:3px;padding:5px 14px;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;font-family:'Courier New',monospace}
+.print-btn:hover{background:#e6a817;color:#0f1923}
+.wrap{display:flex;min-height:calc(100vh - 56px)}
+nav{width:210px;flex-shrink:0;background:#141e2c;border-right:1px solid #253040;overflow-y:auto;padding-bottom:20px;position:sticky;top:56px;height:calc(100vh - 56px)}
+.ng{padding:13px 14px 3px;font-size:9px;font-weight:700;letter-spacing:2px;color:#4a6070;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:9px;padding:8px 14px;font-size:12px;color:#8fa0b0;border-left:3px solid transparent;text-decoration:none;transition:all .12s}
+.ni:hover{background:#1a2535;color:#dce6f0}
+.ico{width:15px;text-align:center;font-size:12px;flex-shrink:0}
+main{flex:1;overflow-y:auto;padding:20px 24px 40px}
+.panel{display:none}
+#s-home{display:block}
+#s-home:target,#s-pipeline:target,#s-hgl:target,#s-surge:target,#s-subsurface:target,#s-culvert:target,#s-opench:target,#s-riprap:target,#s-veglined:target,#s-runoff:target,#s-tc:target,#s-weir:target,#s-drop:target{display:block}
+#s-pipeline:target~#s-home,#s-hgl:target~#s-home,#s-surge:target~#s-home,#s-subsurface:target~#s-home,#s-culvert:target~#s-home,#s-opench:target~#s-home,#s-riprap:target~#s-home,#s-veglined:target~#s-home,#s-runoff:target~#s-home,#s-tc:target~#s-home,#s-weir:target~#s-home,#s-drop:target~#s-home{display:none}
+.card{background:#1a2535;border:1px solid #253040;border-radius:4px;padding:16px;margin-bottom:12px}
+.ct{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:#e6a817;margin-bottom:12px;font-family:'Courier New',monospace}
+.pt{font-size:22px;font-weight:700;letter-spacing:2px;color:#dce6f0;text-transform:uppercase;margin-bottom:2px;font-family:'Courier New',monospace}
+.ps{font-size:11px;color:#4a7090;letter-spacing:.8px;text-transform:uppercase;margin-bottom:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+.f{display:flex;flex-direction:column;gap:4px}
+label{font-size:11px;color:#8fa0b0;font-weight:600;letter-spacing:.4px}
+input[type=number],input[type=text],select{background:#0f1923;border:1px solid #2a3a4a;border-radius:3px;color:#dce6f0;padding:6px 9px;font-size:13px;font-family:'Segoe UI',sans-serif;width:100%;-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+input:focus,select:focus{outline:none;border-color:#e6a817}
+select option{background:#1a2535}
+.un{font-size:10px;color:#4a6070;margin-top:1px}
+.btn{background:#e6a817;color:#0f1923;border:none;border-radius:3px;padding:8px 20px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Courier New',monospace;margin-top:12px}
+.btn:hover{background:#f5bc2a}
+.rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px;margin-top:10px}
+.ri{background:#1a2535;border-radius:3px;padding:9px 11px;border:1px solid #253040}
+.rl{font-size:10px;color:#6a8090;margin-bottom:2px;font-weight:600}
+.rv{font-size:16px;font-weight:700;color:#e6a817;font-family:'Courier New',monospace}
+.ru{font-size:10px;color:#4a6070}
+.ok{color:#22c55e!important}.wn{color:#f59e0b!important}.bd{color:#ef4444!important}
+.note{font-size:11px;color:#8fa0b0;margin-top:10px;padding:8px 12px;border-left:3px solid #253040;background:#141e2c;border-radius:0 3px 3px 0;line-height:1.6}
+.dvd{border:none;border-top:1px solid #253040;margin:12px 0}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+th{background:#141e2c;color:#6a8090;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:7px 9px;text-align:left;border-bottom:1px solid #253040}
+td{padding:6px 9px;border-bottom:1px solid #1f2e3e;color:#c0d0de}
+tr:hover td{background:#1a2535}
+.tok{background:#14532d;color:#22c55e;font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px}
+.tng{background:#450a0a;color:#ef4444;font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px}
+/* Project header bar */
+.proj-bar{background:#1a2535;border:1px solid #253040;border-radius:4px;padding:10px 16px;margin-bottom:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.proj-bar .f{flex:1;min-width:120px}
+.proj-bar label{font-size:10px}
+.proj-bar input{padding:5px 8px;font-size:12px}
+/* Diagram canvas area */
+.diagram-wrap{background:#0a1018;border:1px solid #253040;border-radius:4px;padding:10px;margin-top:12px;overflow-x:auto}
+.diagram-wrap svg{display:block;margin:auto}
+/* Welcome */
+.wc{padding:30px 10px}
+.wl{font-size:38px;font-weight:700;letter-spacing:5px;color:#e6a817;font-family:'Courier New',monospace;margin-bottom:4px}
+.ws{font-size:12px;color:#4a7090;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px}
+.wg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;max-width:900px}
+.wa{background:#1a2535;border:1px solid #253040;border-radius:4px;padding:13px 15px;text-decoration:none;display:block;transition:all .12s}
+.wa:hover{border-color:#e6a817;background:#1f2e40}
+.wt{font-size:12px;font-weight:700;color:#dce6f0;margin-bottom:3px}
+.wd{font-size:11px;color:#4a7090;line-height:1.45}
+
+/* ── PRINT STYLES ── */
+@media print{
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{background:#fff!important;color:#111!important;font-size:11pt}
+  header,nav,.print-btn,.btn,.hdr-right{display:none!important}
+  .wrap{display:block}
+  main{padding:0;overflow:visible}
+  .panel{display:none!important}
+  .panel.print-active{display:block!important}
+  .card{background:#f8f9fa!important;border:1px solid #ccc!important;break-inside:avoid;margin-bottom:8pt}
+  .ct{color:#c07800!important}
+  .pt{color:#111!important}
+  .ps{color:#555!important}
+  .ri{background:#eef!important;border:1px solid #bbb!important}
+  .rl{color:#444!important}
+  .rv{color:#c07800!important}
+  .ru{color:#666!important}
+  .note{background:#f0f0f0!important;color:#333!important}
+  th{background:#ddd!important;color:#333!important}
+  td{color:#111!important}
+  .tok{background:#c8f0c8!important;color:#145214!important}
+  .tng{background:#fcc!important;color:#700!important}
+  .diagram-wrap{background:#fff!important;border:1px solid #ccc!important}
+  .proj-bar{background:#f0f0f0!important;border:1px solid #ccc!important}
+  .proj-bar input{border:none!important;background:transparent!important;color:#111!important;font-weight:600}
+  .print-header{display:block!important}
+  svg text{fill:#111!important}
+  .wc,.wg{display:none!important}
+}
+.print-header{display:none;border-bottom:2pt solid #c07800;margin-bottom:12pt;padding-bottom:8pt}
+.print-header h1{font-size:16pt;font-weight:700;letter-spacing:2px;color:#c07800}
+.print-header .ph-meta{font-size:9pt;color:#444;margin-top:4pt}
+</style>
+</head>
+<body>
+<header>
+  <div><div class="logo">NTCD</div><div class="logo-sub">Hydraulics Calculator</div></div>
+  <div class="hdr-right">
+    <button class="print-btn" onclick="doPrint()">⎙ Print / PDF</button>
+    <div class="hdr-badge">All Calculators</div>
+  </div>
+</header>
+<div class="wrap">
+<nav>
+  <div class="ng">Overview</div>
+  <a class="ni" href="#s-home"><span class="ico">⌂</span>Dashboard</a>
+  <div class="ng">Pipe Systems</div>
+  <a class="ni" href="#s-pipeline"><span class="ico">⊣</span>Pipeline Hydraulics</a>
+  <a class="ni" href="#s-hgl"><span class="ico">≋</span>Pipe HGL / Pressure</a>
+  <a class="ni" href="#s-surge"><span class="ico">↯</span>Surge Pressure</a>
+  <div class="ng">Drainage</div>
+  <a class="ni" href="#s-subsurface"><span class="ico">⚯</span>Subsurface Drain</a>
+  <a class="ni" href="#s-culvert"><span class="ico">◫</span>Culvert Capacity</a>
+  <a class="ni" href="#s-opench"><span class="ico">∿</span>Open Channel</a>
+  <div class="ng">Channel Protection</div>
+  <a class="ni" href="#s-riprap"><span class="ico">◈</span>Riprap Sizing</a>
+  <a class="ni" href="#s-veglined"><span class="ico">❧</span>Veg. Lined Channel</a>
+  <div class="ng">Hydrology</div>
+  <a class="ni" href="#s-runoff"><span class="ico">☂</span>Runoff / CN</a>
+  <a class="ni" href="#s-tc"><span class="ico">⏱</span>Time of Concentration</a>
+  <div class="ng">Structures</div>
+  <a class="ni" href="#s-weir"><span class="ico">⎍</span>Weir / Orifice</a>
+  <a class="ni" href="#s-drop"><span class="ico">↓</span>Grade Stabilizer</a>
+</nav>
+<main>
+
+<!-- PROJECT HEADER (shown on every panel) -->
+<div class="proj-bar" id="proj-bar">
+  <div class="f"><label>Project Name</label><input type="text" id="pj_name" placeholder="e.g. Smith Farm Drainage"></div>
+  <div class="f"><label>Project No.</label><input type="text" id="pj_num" placeholder="2025-001"></div>
+  <div class="f"><label>Designer</label><input type="text" id="pj_des" placeholder="Initials"></div>
+  <div class="f"><label>Date</label><input type="text" id="pj_date" placeholder="mm/dd/yyyy"></div>
+  <div class="f"><label>Checked By</label><input type="text" id="pj_chk" placeholder="Initials"></div>
+</div>
+
+<!-- HOME -->
+<div class="panel" id="s-home">
+<div class="wc">
+  <div class="wl">NTCD</div>
+  <div class="ws">Hydraulics Calculator</div>
+  <div class="wg">
+    <a class="wa" href="#s-pipeline"><div class="wt">Pipeline Hydraulics</div><div class="wd">Full-pipe flow, H-W, pipe class check + profile diagram</div></a>
+    <a class="wa" href="#s-hgl"><div class="wt">Pipe HGL / Pressure</div><div class="wd">True-to-scale HGL profile, working &amp; peak pressure</div></a>
+    <a class="wa" href="#s-surge"><div class="wt">Surge Pressure</div><div class="wd">Water hammer, wave speed, PVC fatigue</div></a>
+    <a class="wa" href="#s-subsurface"><div class="wt">Subsurface Drain</div><div class="wd">Hooghoudt spacing, tube capacity + soil profile diagram</div></a>
+    <a class="wa" href="#s-culvert"><div class="wt">Culvert Capacity</div><div class="wd">Inlet/outlet control, HW:D + profile diagram</div></a>
+    <a class="wa" href="#s-opench"><div class="wt">Open Channel Flow</div><div class="wd">Manning's, normal depth + cross-section diagram</div></a>
+    <a class="wa" href="#s-riprap"><div class="wt">Riprap Sizing</div><div class="wd">D50 by velocity or shear, NRCS class</div></a>
+    <a class="wa" href="#s-veglined"><div class="wt">Veg. Lined Channel</div><div class="wd">Permissible velocity, cover type</div></a>
+    <a class="wa" href="#s-runoff"><div class="wt">Runoff / Curve Number</div><div class="wd">TR-55 CN, runoff depth, peak Q</div></a>
+    <a class="wa" href="#s-tc"><div class="wt">Time of Concentration</div><div class="wd">TR-55 sheet, shallow &amp; channel flow</div></a>
+    <a class="wa" href="#s-weir"><div class="wt">Weir &amp; Orifice</div><div class="wd">Sharp-crested, V-notch, Cipoletti, orifice</div></a>
+    <a class="wa" href="#s-drop"><div class="wt">Grade Stabilizer / Drop</div><div class="wd">Energy dissipation, riprap apron sizing</div></a>
+  </div>
+</div>
+</div>
+
+<!-- ═══ PIPELINE ═══ -->
+<div class="panel" id="s-pipeline">
+<div class="pt">Pipeline Hydraulics</div><div class="ps">Full-pipe pressure flow · Hazen-Williams · NRCS Pipe Engineering</div>
+<div class="card"><div class="ct">System Inputs</div>
+  <div class="g3">
+    <div class="f"><label>Flow Rate (gpm)</label><input type="number" id="pl_Q" value="250"></div>
+    <div class="f"><label>Pipe Inside Diameter (in)</label><input type="number" id="pl_D" value="4" step="0.1"></div>
+    <div class="f"><label>Pipe Length (ft)</label><input type="number" id="pl_L" value="1000"></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Pipe Material</label>
+      <select id="pl_mat" onchange="var v=this.value;if(v!='custom')document.getElementById('pl_C').value=v">
+        <option value="150">PVC (C=150)</option><option value="140">HDPE (C=140)</option>
+        <option value="130">Ductile Iron (C=130)</option><option value="120">Concrete (C=120)</option>
+        <option value="100">CMP (C=100)</option><option value="custom">Custom</option>
+      </select>
+    </div>
+    <div class="f"><label>H-W C Factor</label><input type="number" id="pl_C" value="150"></div>
+    <div class="f"><label>Elevation Diff outlet−inlet (ft)</label><input type="number" id="pl_elev" value="0" step="0.1"><div class="un">negative = uphill</div></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Inlet Ground Elevation (ft)</label><input type="number" id="pl_gel0" value="1050" step="0.1"></div>
+    <div class="f"><label>Inlet Pipe CL Elevation (ft)</label><input type="number" id="pl_pcl0" value="1042" step="0.1"></div>
+    <div class="f"><label>Minor Loss Coeff. Σk</label><input type="number" id="pl_k" value="1.5" step="0.1"><div class="un">entrance+exit+bends</div></div>
+  </div>
+  <button class="btn" onclick="calcPL()">Calculate + Draw Profile</button>
+</div>
+<div class="card" id="pl_res" style="display:none">
+  <div class="ct">Results</div><div class="rg" id="pl_rv"></div>
+  <div class="note" id="pl_no"></div>
+  <div class="dvd"></div>
+  <div class="ct">PVC Pipe Class Check</div>
+  <table><thead><tr><th>Class</th><th>Rating (psi)</th><th>Working Limit (psi)</th><th>Status</th></tr></thead><tbody id="pl_tb"></tbody></table>
+  <div class="ct" style="margin-top:14px">Pipeline Profile</div>
+  <div class="diagram-wrap"><svg id="pl_svg" width="720" height="280"></svg></div>
+</div>
+</div>
+
+<!-- ═══ HGL ═══ -->
+<div class="panel" id="s-hgl">
+<div class="pt">Pipe HGL &amp; Pressure</div>
+<div class="ps">Gravity &amp; Pressure Flow · Manning's Equation · Anchored at Outfall · No Starting HGL Required</div>
+
+<div class="card"><div class="ct">Project Flow &amp; Outfall Boundary</div>
+  <div class="g3">
+    <div class="f"><label>Design Flow Q</label>
+      <div style="display:flex;gap:6px;align-items:center">
+        <input type="number" id="hgl_Q" value="15.6" step="0.1" style="flex:1">
+        <select id="hgl_Qunit" style="width:70px;padding:6px 4px;font-size:12px;background:#0f1923;border:1px solid #2a3a4a;border-radius:3px;color:#dce6f0">
+          <option value="cfs" selected>cfs</option>
+          <option value="gpm">gpm</option>
+        </select>
+      </div>
+    </div>
+    <div class="f"><label>Outfall DS Pipe Invert (ft)</label><input type="number" id="hgl_out_inv" value="3876.908" step="0.001"><div class="un">Invert of last pipe at outfall</div></div>
+    <div class="f"><label>Tailwater Elevation (ft) — blank = free outfall</label><input type="text" id="hgl_tw" placeholder="Leave blank for free outfall"><div class="un">Enter to fix downstream HGL</div></div>
+  </div>
+</div>
+
+<div class="card"><div class="ct">Pipe Sections — enter upstream → downstream (up to 10 pipes)</div>
+  <p style="font-size:11px;color:#4a7090;margin-bottom:8px">Slope is auto-calculated from inverts. Enter pipes from most upstream to outfall.</p>
+  <div style="overflow-x:auto">
+  <table id="hgl_pipetbl">
+    <thead><tr>
+      <th>#</th><th>Pipe ID</th><th>US Node</th><th>DS Node</th>
+      <th>Length (ft)</th><th>Dia. (in)</th>
+      <th>US Invert (ft)</th><th>DS Invert (ft)</th>
+      <th>Manning n</th><th>US Rim (ft)</th>
+      <th>Ke</th><th>Kx</th>
+    </tr></thead>
+    <tbody id="hgl_pipebody"></tbody>
+  </table>
+  </div>
+  <div class="g4" style="margin-top:12px">
+    <div class="f"><label>Vertical Exaggeration</label>
+      <select id="hgl_ve">
+        <option value="1">1x — True to scale</option>
+        <option value="2">2x</option>
+        <option value="4">4x</option>
+        <option value="5" selected>5x</option>
+        <option value="10">10x</option>
+      </select>
+    </div>
+    <div class="f"><label>Y-Axis Min Elev. (ft) — 0 = auto</label><input type="number" id="hgl_ymin" value="0" step="1"></div>
+    <div class="f"><label>Y-Axis Max Elev. (ft) — 0 = auto</label><input type="number" id="hgl_ymax" value="0" step="1"></div>
+    <div class="f"><label>Y Tick Interval (ft) — 0 = auto</label><input type="number" id="hgl_ytick" value="0" step="0.5"></div>
+  </div>
+  <button class="btn" onclick="calcHGL()">Calculate + Draw Profile</button>
+</div>
+
+<div class="card" id="hgl_res" style="display:none">
+  <div class="ct">HGL Results</div>
+  <div style="overflow-x:auto"><table id="hgl_rt"></table></div>
+  <div class="note" id="hgl_no"></div>
+  <div class="ct" style="margin-top:14px">True-to-Scale Pipe Profile</div>
+  <div class="diagram-wrap" style="overflow-x:auto"><svg id="hgl_svg" height="440"></svg></div>
+  <div style="margin-top:8px;font-size:11px;display:flex;gap:18px;flex-wrap:wrap;color:#8fa0b0">
+    <span><svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke="#4a9eff" stroke-width="2.5"/></svg> HGL</span>
+    <span><svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke="#8fa0b0" stroke-width="2"/></svg> Ground / Rim</span>
+    <span><svg width="30" height="6"><rect x="0" y="0" width="30" height="6" fill="#253f5a" stroke="#4a9eff" stroke-width="1"/></svg> Pipe</span>
+    <span style="color:#22c55e">■ Gravity</span>
+    <span style="color:#a855f7">■ Pressurized</span>
+    <span style="color:#ef4444">■ Flooding</span>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══ SURGE ═══ -->
+<div class="panel" id="s-surge">
+<div class="pt">Surge Pressure</div><div class="ps">Water Hammer · Wave Speed · PVC Cycles-to-Failure</div>
+<div class="card"><div class="ct">Parameters</div>
+  <div class="g3">
+    <div class="f"><label>Flow Velocity (ft/s)</label><input type="number" id="sg_V" value="3.5" step="0.1"></div>
+    <div class="f"><label>Pipe Inside Diameter (in)</label><input type="number" id="sg_D" value="4" step="0.1"></div>
+    <div class="f"><label>Wall Thickness (in)</label><input type="number" id="sg_t" value="0.237" step="0.001"></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Pipe Material</label>
+      <select id="sg_mat" onchange="var v=this.value;if(v!='custom')document.getElementById('sg_E').value=v">
+        <option value="400000">PVC (E=400,000 psi)</option>
+        <option value="110000">HDPE (E=110,000 psi)</option>
+        <option value="24000000">Ductile Iron (E=24M psi)</option>
+        <option value="custom">Custom E</option>
+      </select>
+    </div>
+    <div class="f"><label>Modulus of Elasticity E (psi)</label><input type="number" id="sg_E" value="400000"></div>
+    <div class="f"><label>Working Pressure (psi)</label><input type="number" id="sg_wp" value="80"></div>
+  </div>
+  <button class="btn" onclick="calcSG()">Calculate</button>
+</div>
+<div class="card" id="sg_res" style="display:none">
+  <div class="ct">Results</div><div class="rg" id="sg_rv"></div><div class="note" id="sg_no"></div>
+</div>
+</div>
+
+<!-- ═══ SUBSURFACE ═══ -->
+<div class="panel" id="s-subsurface">
+<div class="pt">Subsurface Drainage</div><div class="ps">Hooghoudt's Equation · Drain Tube Spacing · Soil Profile</div>
+<div class="card"><div class="ct">Soil &amp; Design Parameters</div>
+  <div class="g3">
+    <div class="f"><label>Hydraulic Conductivity K (in/hr)</label><input type="number" id="sd_K" value="1.5" step="0.1"></div>
+    <div class="f"><label>Design Drainage Rate q (in/day)</label><input type="number" id="sd_q" value="0.375" step="0.025"><div class="un">1/4 to 1/2 in/day typical</div></div>
+    <div class="f"><label>Midpoint Water Table m (in above drain)</label><input type="number" id="sd_m" value="18"></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Depth to Impermeable Layer d (in below drain)</label><input type="number" id="sd_d" value="60"></div>
+    <div class="f"><label>Drain Tube Diameter</label>
+      <select id="sd_sz"><option value="4">4 in</option><option value="6" selected>6 in</option><option value="8">8 in</option><option value="10">10 in</option><option value="12">12 in</option></select>
+    </div>
+    <div class="f"><label>Drain Grade (%)</label><input type="number" id="sd_gr" value="0.2" step="0.05"><div class="un">0.1% minimum</div></div>
+  </div>
+  <div class="g2" style="margin-top:10px">
+    <div class="f"><label>Drain Depth below Surface (in)</label><input type="number" id="sd_dep" value="36"></div>
+    <div class="f"><label>Drain Length (ft)</label><input type="number" id="sd_le" value="1320"></div>
+  </div>
+  <button class="btn" onclick="calcSD()">Calculate + Draw Section</button>
+</div>
+<div class="card" id="sd_res" style="display:none">
+  <div class="ct">Results</div><div class="rg" id="sd_rv"></div><div class="note" id="sd_no"></div>
+  <div class="ct" style="margin-top:14px">Soil Profile Cross-Section</div>
+  <div class="diagram-wrap"><svg id="sd_svg" width="720" height="300"></svg></div>
+</div>
+</div>
+
+<!-- ═══ CULVERT ═══ -->
+<div class="panel" id="s-culvert">
+<div class="pt">Culvert Capacity</div><div class="ps">Inlet &amp; Outlet Control · HW:D Ratio · Profile Diagram</div>
+<div class="card"><div class="ct">Parameters</div>
+  <div class="g3">
+    <div class="f"><label>Design Flow Q (cfs)</label><input type="number" id="cv_Q" value="50"></div>
+    <div class="f"><label>Culvert Diameter / Rise (in)</label><input type="number" id="cv_D" value="36"></div>
+    <div class="f"><label>Culvert Length (ft)</label><input type="number" id="cv_L" value="60"></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Culvert Type</label>
+      <select id="cv_ty"><option value="cmp">CMP (n=0.024)</option><option value="rcp">RCP (n=0.013)</option><option value="hdpe">HDPE (n=0.012)</option><option value="box">Concrete Box (n=0.013)</option></select>
+    </div>
+    <div class="f"><label>Inlet Type (Ke)</label>
+      <select id="cv_ke"><option value="0.9">Projecting (Ke=0.9)</option><option value="0.5" selected>Headwall square edge (Ke=0.5)</option><option value="0.2">Headwall beveled (Ke=0.2)</option></select>
+    </div>
+    <div class="f"><label>Culvert Slope (%)</label><input type="number" id="cv_S" value="1.0" step="0.1"></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Tailwater TW (ft above outlet invert)</label><input type="number" id="cv_TW" value="0" step="0.1"></div>
+    <div class="f"><label>Allowable HW (in) — typ. 1.5×D</label><input type="number" id="cv_HW" value="54"></div>
+    <div class="f"><label>Embankment Height above pipe (ft)</label><input type="number" id="cv_emb" value="8" step="0.5"></div>
+  </div>
+  <button class="btn" onclick="calcCV()">Calculate + Draw Profile</button>
+</div>
+<div class="card" id="cv_res" style="display:none">
+  <div class="ct">Results</div><div class="rg" id="cv_rv"></div><div class="note" id="cv_no"></div>
+  <div class="ct" style="margin-top:14px">Culvert Profile</div>
+  <div class="diagram-wrap"><svg id="cv_svg" width="720" height="300"></svg></div>
+</div>
+</div>
+
+<!-- ═══ OPEN CHANNEL ═══ -->
+<div class="panel" id="s-opench">
+<div class="pt">Open Channel Flow</div><div class="ps">Manning's Equation · Normal Depth · Cross-Section with WSE &amp; HGL</div>
+<div class="card"><div class="ct">Channel Parameters</div>
+  <div class="g3">
+    <div class="f"><label>Channel Shape</label>
+      <select id="oc_sh"><option value="trap">Trapezoidal</option><option value="tri">Triangular (V-ditch)</option><option value="rect">Rectangular</option><option value="circ">Circular Pipe</option></select>
+    </div>
+    <div class="f"><label>Manning's n (select)</label>
+      <select onchange="document.getElementById('oc_n').value=this.value">
+        <option value="0.012">Concrete (0.012)</option><option value="0.015">Smooth Earth (0.015)</option>
+        <option value="0.022">Good Stand Grass (0.022)</option><option value="0.030" selected>Short Grass (0.030)</option>
+        <option value="0.035">Dense Grass (0.035)</option><option value="0.040">Bermuda (0.040)</option>
+        <option value="0.045">Natural Channel (0.045)</option><option value="0.060">Very Weedy (0.060)</option>
+      </select>
+    </div>
+    <div class="f"><label>n Value</label><input type="number" id="oc_n" value="0.030" step="0.001"></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Bottom Width b (ft) / Pipe Diameter D (ft)</label><input type="number" id="oc_b" value="4" step="0.5"></div>
+    <div class="f"><label>Side Slope z (H:1V) — not used for circular</label><input type="number" id="oc_z" value="3" step="0.5"></div>
+    <div class="f"><label>Channel Slope (%)</label><input type="number" id="oc_S" value="0.5" step="0.1"></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Known Depth y (ft) — 0 to solve from Q [circular: y &lt; D]</label><input type="number" id="oc_y" value="1.5" step="0.1"></div>
+    <div class="f"><label>Known Q (cfs) — 0 if depth given</label><input type="number" id="oc_Q" value="0"></div>
+    <div class="f"><label>Total Bank Height / Freeboard (ft)</label><input type="number" id="oc_fb" value="2.0" step="0.1"><div class="un">full channel depth for diagram</div></div>
+  </div>
+  <button class="btn" onclick="calcOC()">Calculate + Draw Section</button>
+</div>
+<div class="card" id="oc_res" style="display:none">
+  <div class="ct">Results</div><div class="rg" id="oc_rv"></div><div class="note" id="oc_no"></div>
+  <div class="ct" style="margin-top:14px">Cross-Section — WSE &amp; HGL</div>
+  <div class="diagram-wrap"><svg id="oc_svg" width="720" height="340"></svg></div>
+  <div style="margin-top:8px;font-size:10px;display:flex;gap:18px;flex-wrap:wrap">
+    <span><svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke="#4a9eff" stroke-width="2.5"/></svg> Water Surface (WSE)</span>
+    <span><svg width="30" height="6"><line x1="0" y1="3" x2="30" y2="3" stroke="#22c55e" stroke-width="2" stroke-dasharray="5,3"/></svg> Energy Grade Line (EGL)</span>
+    <span><svg width="30" height="6"><rect x="0" y="0" width="30" height="6" fill="#8B6914" opacity="0.5"/></svg> Channel Section</span>
+  </div>
+</div>
+</div>
+
+<!-- RIPRAP, VEGLINED, RUNOFF, TC, WEIR, DROP — no diagram, pass through -->
+<div class="panel" id="s-riprap">
+<div class="pt">Riprap Sizing</div><div class="ps">D50 by Velocity &amp; Shear · NRCS EFH Ch.16 · EM 1110-2-1601</div>
+<div class="card"><div class="ct">Method &amp; Flow Parameters</div>
+  <div class="g2"><div class="f"><label>Design Method</label><select id="rr_me"><option value="vel">Velocity Method (NRCS EFH)</option><option value="shear">Shear Stress Method (EM 1110)</option></select></div><div class="f"><label>Application</label><select id="rr_sh"><option value="1.0">Straight Channel Reach</option><option value="1.3">Channel Bend (+30%)</option><option value="1.5">Culvert / Pipe Outlet (+50%)</option></select></div></div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Mean Velocity V (ft/s)</label><input type="number" id="rr_V" value="6.5" step="0.1"></div>
+    <div class="f"><label>Flow Depth y (ft)</label><input type="number" id="rr_y" value="3" step="0.1"></div>
+    <div class="f"><label>Slope S (%)</label><input type="number" id="rr_S" value="1.0" step="0.1"></div>
+  </div>
+  <div class="g3" style="margin-top:10px">
+    <div class="f"><label>Side Slope z (H:1V)</label><input type="number" id="rr_z" value="2" step="0.5"></div>
+    <div class="f"><label>Rock Sp. Gravity Sg</label><input type="number" id="rr_sg" value="2.65" step="0.05"></div>
+    <div class="f"><label>Safety Factor SF</label><input type="number" id="rr_sf" value="1.3" step="0.05"></div>
+  </div>
+  <button class="btn" onclick="calcRR()">Calculate</button>
+</div>
+<div class="card" id="rr_res" style="display:none"><div class="ct">Results</div><div class="rg" id="rr_rv"></div><div class="note" id="rr_no"></div></div>
+<div class="card"><div class="ct">NRCS Riprap Class Reference</div>
+  <table><thead><tr><th>Class</th><th>D50 (in)</th><th>D50 (ft)</th><th>Approx D100 (in)</th><th>Typical Application</th></tr></thead><tbody>
+    <tr><td>Class I</td><td>9</td><td>0.75</td><td>15</td><td>Low velocity, V &lt; 6 fps</td></tr>
+    <tr><td>Class II</td><td>12</td><td>1.00</td><td>21</td><td>Moderate velocity, culvert outlets</td></tr>
+    <tr><td>Class III</td><td>15</td><td>1.25</td><td>27</td><td>High velocity, V 8–12 fps</td></tr>
+    <tr><td>Class IV</td><td>21</td><td>1.75</td><td>36</td><td>Very high velocity or deep flow</td></tr>
+    <tr><td>Class V</td><td>30</td><td>2.50</td><td>54</td><td>Extreme, drops &amp; spillways</td></tr>
+  </tbody></table>
+</div>
+</div>
+
+<div class="panel" id="s-veglined">
+<div class="pt">Vegetated Lined Channel</div><div class="ps">Permissible Velocity · NRCS EFH</div>
+<div class="card"><div class="ct">Channel &amp; Vegetation</div>
+  <div class="g3"><div class="f"><label>Vegetation Cover</label><select id="vg_cv"><option value="bermuda_good">Bermuda — Good</option><option value="bermuda_fair">Bermuda — Fair</option><option value="kentucky">Kentucky Bluegrass</option><option value="native_good">Native Grass — Good</option><option value="native_fair">Native Grass — Fair</option><option value="sorghum">Sorghum Sudangrass</option><option value="small_grain">Small Grain (temp.)</option></select></div><div class="f"><label>Soil Erodibility</label><select id="vg_so"><option value="0.0">Erosion Resistant</option><option value="0.5" selected>Moderate</option><option value="1.0">Easily Eroded</option></select></div><div class="f"><label>Bottom Width b (ft)</label><input type="number" id="vg_b" value="8" step="0.5"></div></div>
+  <div class="g3" style="margin-top:10px"><div class="f"><label>Side Slope z (H:1V)</label><input type="number" id="vg_z" value="3" step="0.5"></div><div class="f"><label>Slope (%)</label><input type="number" id="vg_S" value="2.0" step="0.1"></div><div class="f"><label>Design Depth (ft)</label><input type="number" id="vg_y" value="1.5" step="0.1"></div></div>
+  <button class="btn" onclick="calcVG()">Calculate</button>
+</div>
+<div class="card" id="vg_res" style="display:none"><div class="ct">Results</div><div class="rg" id="vg_rv"></div><div class="note" id="vg_no"></div></div>
+</div>
+
+<div class="panel" id="s-runoff">
+<div class="pt">Runoff &amp; Curve Number</div><div class="ps">TR-55 · NRCS CN Method</div>
+<div class="card"><div class="ct">Watershed Parameters</div>
+  <div class="g3"><div class="f"><label>Area A (acres)</label><input type="number" id="ro_A" value="50"></div><div class="f"><label>Curve Number CN</label><input type="number" id="ro_CN" value="78" min="40" max="100"></div><div class="f"><label>Rainfall P (in)</label><input type="number" id="ro_P" value="3.0" step="0.25"></div></div>
+  <div class="g3" style="margin-top:10px"><div class="f"><label>AMC</label><select id="ro_AM"><option value="dry">AMC-I Dry</option><option value="avg" selected>AMC-II Average</option><option value="wet">AMC-III Wet</option></select></div><div class="f"><label>Tc (min)</label><input type="number" id="ro_Tc" value="30"></div><div class="f"><label>Ia/S ratio</label><input type="number" id="ro_Ia" value="0.2" step="0.05"></div></div>
+  <button class="btn" onclick="calcRO()">Calculate</button>
+</div>
+<div class="card" id="ro_res" style="display:none"><div class="ct">Results</div><div class="rg" id="ro_rv"></div><div class="note" id="ro_no"></div></div>
+<div class="card"><div class="ct">CN Reference</div>
+  <table><thead><tr><th>Land Use / Cover</th><th>HSG A</th><th>HSG B</th><th>HSG C</th><th>HSG D</th></tr></thead><tbody>
+    <tr><td>Row Crops — straight rows</td><td>72</td><td>81</td><td>88</td><td>91</td></tr>
+    <tr><td>Row Crops — contoured</td><td>67</td><td>78</td><td>85</td><td>89</td></tr>
+    <tr><td>Small Grain</td><td>63</td><td>75</td><td>83</td><td>87</td></tr>
+    <tr><td>Pasture — good</td><td>39</td><td>61</td><td>74</td><td>80</td></tr>
+    <tr><td>Meadow — good</td><td>30</td><td>58</td><td>71</td><td>78</td></tr>
+    <tr><td>Woods — good</td><td>30</td><td>55</td><td>70</td><td>77</td></tr>
+    <tr><td>Impervious</td><td>98</td><td>98</td><td>98</td><td>98</td></tr>
+  </tbody></table>
+</div>
+</div>
+
+<div class="panel" id="s-tc">
+<div class="pt">Time of Concentration</div><div class="ps">TR-55 Three-Segment Method</div>
+<div class="card"><div class="ct">Segment 1 — Sheet Flow</div>
+  <div class="g3"><div class="f"><label>Surface Type</label><select id="tc_su" onchange="document.getElementById('tc_n1').value=this.value"><option value="0.011">Smooth (concrete)</option><option value="0.015">Fallow, bare soil</option><option value="0.13">Short grass</option><option value="0.24" selected>Dense grass</option><option value="0.06">Light underbrush</option><option value="0.40">Dense woods</option></select></div><div class="f"><label>n (sheet flow)</label><input type="number" id="tc_n1" value="0.24" step="0.01"></div><div class="f"><label>L1 (ft, max 300)</label><input type="number" id="tc_L1" value="200"></div></div>
+  <div class="g2" style="margin-top:10px"><div class="f"><label>P2 — 2yr 24hr rainfall (in)</label><input type="number" id="tc_P2" value="2.5" step="0.1"></div><div class="f"><label>Slope s1 (%)</label><input type="number" id="tc_s1" value="2.0" step="0.1"></div></div>
+</div>
+<div class="card"><div class="ct">Segment 2 — Shallow Concentrated Flow</div>
+  <div class="g3"><div class="f"><label>Surface</label><select id="tc_st"><option value="paved">Paved</option><option value="unpaved" selected>Unpaved</option></select></div><div class="f"><label>L2 (ft)</label><input type="number" id="tc_L2" value="800"></div><div class="f"><label>Slope s2 (%)</label><input type="number" id="tc_s2" value="1.5" step="0.1"></div></div>
+</div>
+<div class="card"><div class="ct">Segment 3 — Channel Flow</div>
+  <div class="g3"><div class="f"><label>Channel n</label><input type="number" id="tc_n3" value="0.035" step="0.001"></div><div class="f"><label>Area A3 (ft²)</label><input type="number" id="tc_A3" value="18" step="0.5"></div><div class="f"><label>Wetted Perim. P3 (ft)</label><input type="number" id="tc_P3" value="12" step="0.5"></div></div>
+  <div class="g2" style="margin-top:10px"><div class="f"><label>L3 (ft)</label><input type="number" id="tc_L3" value="2000"></div><div class="f"><label>Slope s3 (%)</label><input type="number" id="tc_s3" value="0.5" step="0.1"></div></div>
+  <button class="btn" onclick="calcTC()">Calculate Tc</button>
+</div>
+<div class="card" id="tc_res" style="display:none"><div class="ct">Results</div><div class="rg" id="tc_rv"></div><div class="note" id="tc_no"></div></div>
+</div>
+
+<div class="panel" id="s-weir">
+<div class="pt">Weir &amp; Orifice</div><div class="ps">Sharp-Crested · V-Notch · Cipoletti · Orifice</div>
+<div class="card"><div class="ct">Structure Parameters</div>
+  <div class="g2"><div class="f"><label>Structure Type</label><select id="wo_ty"><option value="rect_sc">Rectangular Sharp-Crested</option><option value="rect_bc">Broad-Crested</option><option value="vnotch">V-Notch 90°</option><option value="cip">Cipoletti (1:4 sides)</option><option value="orifice">Circular Orifice</option></select></div><div class="f"><label>Crest Length L or Dia. (ft)</label><input type="number" id="wo_L" value="6" step="0.1"></div></div>
+  <div class="g3" style="margin-top:10px"><div class="f"><label>Head H above crest (ft)</label><input type="number" id="wo_H" value="1.2" step="0.01"></div><div class="f"><label>Cd</label><input type="number" id="wo_Cd" value="0.611" step="0.01"></div><div class="f"><label>End Contractions n (0-2)</label><input type="number" id="wo_n" value="2" min="0" max="2"></div></div>
+  <button class="btn" onclick="calcWO()">Calculate</button>
+</div>
+<div class="card" id="wo_res" style="display:none"><div class="ct">Results</div><div class="rg" id="wo_rv"></div><div class="note" id="wo_no"></div></div>
+</div>
+
+<div class="panel" id="s-drop">
+<div class="pt">Grade Stabilizer / Drop</div><div class="ps">Energy Dissipation · Riprap Apron · NRCS Standard</div>
+<div class="card"><div class="ct">Drop Structure Parameters</div>
+  <div class="g3"><div class="f"><label>Design Q (cfs)</label><input type="number" id="dr_Q" value="80"></div><div class="f"><label>Drop Height h (ft)</label><input type="number" id="dr_h" value="4" step="0.25"></div><div class="f"><label>Crest Length L (ft)</label><input type="number" id="dr_L" value="20"></div></div>
+  <div class="g3" style="margin-top:10px"><div class="f"><label>Upstream Velocity (ft/s)</label><input type="number" id="dr_Vu" value="3" step="0.1"></div><div class="f"><label>D50 Channel Material (ft)</label><input type="number" id="dr_d5" value="0.1" step="0.05"></div><div class="f"><label>Rock Sg</label><input type="number" id="dr_Sg" value="2.65" step="0.05"></div></div>
+  <button class="btn" onclick="calcDR()">Calculate</button>
+</div>
+<div class="card" id="dr_res" style="display:none"><div class="ct">Results</div><div class="rg" id="dr_rv"></div><div class="note" id="dr_no"></div></div>
+</div>
+
+</main>
+</div>
+
+<script>
+// ── Utilities ─────────────────────────────────────────────────
+function g(id){return parseFloat(document.getElementById(id).value)||0;}
+function gv(id){return document.getElementById(id).value;}
+function ri(label,val,unit,cls){
+  var fs=String(val).length>9?'12px':'16px';
+  return'<div class="ri"><div class="rl">'+label+'</div><div class="rv '+(cls||'')+'" style="font-size:'+fs+'">'+val+'</div><div class="ru">'+unit+'</div></div>';
+}
+function rrc(d){if(d<=9)return'Class I (9")';if(d<=12)return'Class II (12")';if(d<=15)return'Class III (15")';if(d<=21)return'Class IV (21")';return'Class V (30"+)';}
+function tok(){return'<span class="tok">OK</span>';}
+function tng(){return'<span class="tng">NG</span>';}
+
+// SVG helpers
+function svgEl(tag,attrs){
+  var el=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  Object.keys(attrs).forEach(function(k){el.setAttribute(k,attrs[k]);});
+  return el;
+}
+function svgTxt(svg,x,y,txt,attrs){
+  var el=svgEl('text',Object.assign({x:x,y:y,'font-family':'Courier New,monospace','font-size':'10','fill':'#8fa0b0'},attrs||{}));
+  el.textContent=txt;svg.appendChild(el);return el;
+}
+function svgLine(svg,x1,y1,x2,y2,attrs){
+  var el=svgEl('line',Object.assign({x1:x1,y1:y1,x2:x2,y2:y2},attrs||{}));
+  svg.appendChild(el);return el;
+}
+function svgRect(svg,x,y,w,h,attrs){
+  var el=svgEl('rect',Object.assign({x:x,y:y,width:w,height:h},attrs||{}));
+  svg.appendChild(el);return el;
+}
+function svgPoly(svg,pts,attrs){
+  var el=svgEl('polygon',Object.assign({points:pts.map(function(p){return p[0]+','+p[1];}).join(' ')},attrs||{}));
+  svg.appendChild(el);return el;
+}
+function svgPath(svg,d,attrs){
+  var el=svgEl('path',Object.assign({d:d},attrs||{}));
+  svg.appendChild(el);return el;
+}
+function clearSVG(id){var s=typeof id==='string'?document.getElementById(id):id;while(s&&s.firstChild)s.removeChild(s.firstChild);}
+
+// Scale helper
+function makeScale(dataMin,dataMax,pxMin,pxMax){
+  var span=dataMax-dataMin||1;
+  return function(v){return pxMin+(v-dataMin)/(span)*(pxMax-pxMin);};
+}
+
+// ── Print ─────────────────────────────────────────────────────
+function doPrint(){
+  var panels=document.querySelectorAll('.panel');
+  var active=null;
+  panels.forEach(function(p){
+    p.classList.remove('print-active');
+    if(p.style.display==='block'||window.getComputedStyle(p).display==='block') active=p;
+  });
+  if(active) active.classList.add('print-active');
+  window.print();
+}
+
+// ── HGL Station Table Init ────────────────────────────────────
+window.addEventListener('DOMContentLoaded',function(){
+  // Auto-fill today's date
+  var now=new Date();
+  var mo=now.getMonth()+1,dy=now.getDate(),yr=now.getFullYear();
+  var dateEl=document.getElementById('pj_date');
+  if(dateEl) dateEl.value=(mo<10?'0':'')+mo+'/'+(dy<10?'0':'')+dy+'/'+yr;
+
+  // Build HGL pipe section table
+  var tb=document.getElementById('hgl_pipebody');
+  if(tb){
+    var defaults=[
+      ['Link-01','Jun-01','Jun-02','1098','48','3882.040','3877.986','0.012','3888.04','0.5','0.5'],
+      ['Link-02','Jun-02','Out-01','5395','48','3877.986','3876.908','0.012','3883.98','0.5','0.5'],
+      ['','','','','','','','0.013','','0.5','0.5'],
+      ['','','','','','','','0.013','','0.5','0.5'],
+      ['','','','','','','','0.013','','0.5','0.5'],
+      ['','','','','','','','0.013','','0.5','0.5'],
+      ['','','','','','','','0.013','','0.5','0.5'],
+      ['','','','','','','','0.013','','0.5','0.5'],
+      ['','','','','','','','0.013','','0.5','0.5'],
+      ['','','','','','','','0.013','','0.5','0.5']
+    ];
+    var iw='62px',nw='72px',dw='58px',ew='76px',kw='48px';
+    defaults.forEach(function(d,i){
+      var r=tb.insertRow();
+      r.innerHTML='<td style="color:#4a6070;font-size:11px;text-align:center">'+(i+1)+'</td>'
+        +'<td><input type="text" id="hp_id'+i+'" value="'+d[0]+'" style="width:'+nw+'"></td>'
+        +'<td><input type="text" id="hp_us'+i+'" value="'+d[1]+'" style="width:'+nw+'"></td>'
+        +'<td><input type="text" id="hp_ds'+i+'" value="'+d[2]+'" style="width:'+nw+'"></td>'
+        +'<td><input type="number" id="hp_L'+i+'" value="'+d[3]+'" style="width:'+iw+'" step="1"></td>'
+        +'<td><input type="number" id="hp_D'+i+'" value="'+d[4]+'" style="width:'+dw+'" step="1"></td>'
+        +'<td><input type="number" id="hp_ui'+i+'" value="'+d[5]+'" style="width:'+ew+'" step="0.001"></td>'
+        +'<td><input type="number" id="hp_di'+i+'" value="'+d[6]+'" style="width:'+ew+'" step="0.001"></td>'
+        +'<td><input type="number" id="hp_n'+i+'" value="'+d[7]+'" style="width:'+kw+'" step="0.001"></td>'
+        +'<td><input type="number" id="hp_rim'+i+'" value="'+d[8]+'" style="width:'+ew+'" step="0.01"></td>'
+        +'<td><input type="number" id="hp_ke'+i+'" value="'+d[9]+'" style="width:'+kw+'" step="0.1"></td>'
+        +'<td><input type="number" id="hp_kx'+i+'" value="'+d[10]+'" style="width:'+kw+'" step="0.1"></td>';
+    });
+  }
+});
+
+
+// ═══════════════════════════════════════════════════
+// PIPELINE
+// ═══════════════════════════════════════════════════
+function calcPL(){
+  var Q=g('pl_Q'),D=g('pl_D'),L=g('pl_L'),C=g('pl_C'),el=g('pl_elev'),k=g('pl_k');
+  var gel0=g('pl_gel0'),pcl0=g('pl_pcl0');
+  var Qunit=gv('hgl_Qunit');
+  var Df=D/12,Qc=Qunit==='cfs'?Q:Q/449,A=Math.PI*Df*Df/4,V=Qc/A;
+  var hf=10.67*L*Math.pow(Qc,1.852)/(Math.pow(C,1.852)*Math.pow(Df,4.87));
+  var hm=k*V*V/64.4,ht=hf+hm,wp=(ht-el)*0.4335;
+  var cls=[100,125,160,200,250,315],rows='';
+  cls.forEach(function(p){var wl=(p*0.72).toFixed(0);rows+='<tr><td>PVC '+p+'</td><td>'+p+'</td><td>'+wl+'</td><td>'+(wp<=parseFloat(wl)?tok():tng())+'</td></tr>';});
+  document.getElementById('pl_res').style.display='block';
+  document.getElementById('pl_rv').innerHTML=
+    ri('Velocity',V.toFixed(2),'ft/s',V>5?'wn':'')+
+    ri('Friction Loss hf',hf.toFixed(2),'ft')+
+    ri('Minor Loss hm',hm.toFixed(2),'ft')+
+    ri('Total Head Loss',ht.toFixed(2),'ft')+
+    ri('Working Pressure',wp.toFixed(1),'psi',wp>150?'bd':wp>100?'wn':'')+
+    ri('Loss Rate',(hf/L*100).toFixed(3),'ft/100ft');
+  document.getElementById('pl_no').innerHTML='H-W C='+C+'. '+(V>5?'<b>Velocity >5 ft/s</b> — consider larger pipe.':'Velocity OK.')+' Elevation: '+(el>=0?'downhill':'uphill')+' '+Math.abs(el).toFixed(1)+' ft.';
+  document.getElementById('pl_tb').innerHTML=rows;
+  drawPipelineProfile(L,el,ht,pcl0,gel0,D,wp);
+}
+
+function drawPipelineProfile(L,el,ht,pcl0,gel0,D,wp){
+  var svg=document.getElementById('pl_svg');
+  clearSVG(svg);
+  var W=720,H=280,pad={l:60,r:20,t:20,b:40};
+  var pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
+  svg.setAttribute('width',W);svg.setAttribute('height',H);
+
+  // Data points: inlet and outlet
+  var pcl1=pcl0+el; // outlet pipe CL
+  var gel1=gel0+el; // approx ground outlet
+  var hgl0_=pcl0+ht; // HGL at inlet (pcl + total head)
+  var hgl1_=pcl1; // HGL at outlet = pipe CL + remaining head (simplified: = pcl1 for full flow check)
+
+  // Compute true HGL: inlet HGL = pcl0 + wp/0.4335
+  var hglIn=pcl0+wp/0.4335;
+  var hglOut=pcl1; // simplification
+
+  var allY=[gel0,gel1,pcl0,pcl1,hglIn,hglOut,pcl0-D/12,pcl1-D/12];
+  var yMin=Math.min.apply(null,allY)-1, yMax=Math.max.apply(null,allY)+2;
+  var xSc=makeScale(0,L,pad.l,pad.l+pw);
+  var ySc=makeScale(yMin,yMax,pad.t+ph,pad.t);
+
+  // Grid
+  for(var i=0;i<=5;i++){
+    var yv=yMin+(yMax-yMin)*i/5;
+    var yp=ySc(yv);
+    svgLine(svg,pad.l,yp,pad.l+pw,yp,{stroke:'#1f2e3e','stroke-width':'0.5'});
+    svgTxt(svg,pad.l-4,yp+3,yv.toFixed(1),{'text-anchor':'end','font-size':'9','fill':'#4a6070'});
+  }
+  var _rx=pad.l-45,_ry=H/2;svgTxt(svg,_rx,_ry,'Elevation (ft)',{'font-size':'9','fill':'#4a6070',transform:'rotate(-90,'+_rx+','+_ry+')'});
+  // X axis labels
+  svgTxt(svg,xSc(0),H-8,'0',{'text-anchor':'middle','font-size':'9','fill':'#4a6070'});
+  svgTxt(svg,xSc(L),H-8,L+'ft',{'text-anchor':'middle','font-size':'9','fill':'#4a6070'});
+  svgTxt(svg,W/2,H-2,'Station (ft)',{'text-anchor':'middle','font-size':'9','fill':'#4a6070'});
+
+  // Ground surface
+  svgLine(svg,xSc(0),ySc(gel0),xSc(L),ySc(gel1),{stroke:'#8fa0b0','stroke-width':'2'});
+  svgTxt(svg,xSc(L)-2,ySc(gel1)-5,'Ground',{'text-anchor':'end','font-size':'9','fill':'#8fa0b0'});
+
+  // Pipe barrel (filled rect to scale)
+  var pipeHft=D/12;
+  var x0=xSc(0),x1=xSc(L),yTop0=ySc(pcl0+pipeHft/2),yBot0=ySc(pcl0-pipeHft/2);
+  var yTop1=ySc(pcl1+pipeHft/2),yBot1=ySc(pcl1-pipeHft/2);
+  var pts=[[x0,yTop0],[x1,yTop1],[x1,yBot1],[x0,yBot0]];
+  svgPoly(svg,pts,{fill:'#253f5a',stroke:'#4a9eff','stroke-width':'1.5'});
+
+  // Pipe CL
+  svgLine(svg,xSc(0),ySc(pcl0),xSc(L),ySc(pcl1),{stroke:'#22c55e','stroke-width':'1.5','stroke-dasharray':'6,3'});
+
+  // HGL line
+  svgLine(svg,xSc(0),ySc(hglIn),xSc(L),ySc(hglOut),{stroke:'#4a9eff','stroke-width':'2.5'});
+  svgTxt(svg,xSc(0)+4,ySc(hglIn)-5,'HGL',{'font-size':'9','fill':'#4a9eff'});
+
+  // Labels
+  svgTxt(svg,xSc(0)+4,ySc(pcl0)-5,'Inlet CL='+pcl0.toFixed(1)+"'",{'font-size':'9','fill':'#22c55e'});
+  svgTxt(svg,xSc(L)-4,ySc(pcl1)-5,'Outlet CL='+pcl1.toFixed(1)+"'",{'text-anchor':'end','font-size':'9','fill':'#22c55e'});
+  svgTxt(svg,xSc(0)+4,ySc(hglIn)+12,'HGL='+hglIn.toFixed(1)+"'",{'font-size':'9','fill':'#4a9eff'});
+
+  // Axes
+  svgLine(svg,pad.l,pad.t,pad.l,pad.t+ph,{stroke:'#253040','stroke-width':'1'});
+  svgLine(svg,pad.l,pad.t+ph,pad.l+pw,pad.t+ph,{stroke:'#253040','stroke-width':'1'});
+}
+
+// ═══════════════════════════════════════════════════
+// HGL PROFILE
+// ═══════════════════════════════════════════════════
+// HGL pipe table built in DOMContentLoaded
+
+// ── Normal depth via Newton-Raphson ──────────────────────────
+function normalDepth(Q,D_in,slope,n){
+  var D=D_in/12,r=D/2;
+  if(slope<=0||slope!==slope)return D;
+  var Af=Math.PI*r*r,Rf=r/2;
+  var Qfull=(1.486/n)*Af*Math.pow(Rf,2/3)*Math.pow(slope,0.5);
+  if(Q>=Qfull)return D;
+  var y=r*Math.pow(Q/Qfull,0.4);
+  y=Math.max(0.01*D,Math.min(y,0.99*D));
+  for(var i=0;i<50;i++){
+    var h=r-y,theta=2*Math.acos(Math.max(-1,Math.min(1,h/r)));
+    var A=r*r*(theta-Math.sin(theta))/2,P=r*theta,R=P>0?A/P:0;
+    var Qy=R>0?(1.486/n)*A*Math.pow(R,2/3)*Math.pow(slope,0.5):0;
+    var dy=y*0.001+1e-6,y2=Math.min(y+dy,0.9999*D);
+    var h2=r-y2,th2=2*Math.acos(Math.max(-1,Math.min(1,h2/r)));
+    var A2=r*r*(th2-Math.sin(th2))/2,P2=r*th2,R2=P2>0?A2/P2:0;
+    var Qy2=R2>0?(1.486/n)*A2*Math.pow(R2,2/3)*Math.pow(slope,0.5):0;
+    var dQdy=dy>0?(Qy2-Qy)/dy:1,F=Qy-Q;
+    if(Math.abs(F)<1e-6)break;
+    if(Math.abs(dQdy)<1e-12)break;
+    y=Math.max(0.001*D,Math.min(y-F/dQdy,0.9999*D));
+  }
+  return y;
+}
+
+// ── Main HGL calculator ───────────────────────────────────────
+function calcHGL(){
+  var Q_raw=parseFloat(document.getElementById('hgl_Q').value)||0;
+  var Qunit=gv('hgl_Qunit');
+  var Q=Qunit==='gpm'?Q_raw/449:Q_raw; // convert to cfs
+  var outInv=parseFloat(document.getElementById('hgl_out_inv').value)||0;
+  var twStr=document.getElementById('hgl_tw').value.trim();
+  var tw=twStr===''?null:parseFloat(twStr);
+
+  // Read pipe sections
+  var pipes=[];
+  for(var i=0;i<10;i++){
+    var pid=document.getElementById('hp_id'+i).value.trim();
+    if(!pid)continue;
+    var L=parseFloat(document.getElementById('hp_L'+i).value)||0;
+    var D=parseFloat(document.getElementById('hp_D'+i).value)||0;
+    var ui=parseFloat(document.getElementById('hp_ui'+i).value)||0;
+    var di=parseFloat(document.getElementById('hp_di'+i).value)||0;
+    var n=parseFloat(document.getElementById('hp_n'+i).value)||0.013;
+    var rim=parseFloat(document.getElementById('hp_rim'+i).value)||0;
+    var ke=parseFloat(document.getElementById('hp_ke'+i).value)||0.5;
+    var kx=parseFloat(document.getElementById('hp_kx'+i).value)||0.5;
+    var usNode=document.getElementById('hp_us'+i).value.trim();
+    var dsNode=document.getElementById('hp_ds'+i).value.trim();
+    var slope=L>0?(ui-di)/L:0;
+    pipes.push({id:pid,usNode:usNode,dsNode:dsNode,L:L,D:D,ui:ui,di:di,n:n,rim:rim,ke:ke,kx:kx,slope:slope});
+  }
+  if(!pipes.length){alert('Enter at least one pipe section.');return;}
+
+  // Last pipe DS invert for free outfall
+  var lastPipe=pipes[pipes.length-1];
+
+  // Calculate full-pipe hydraulics for each pipe
+  var results=[];
+  for(var i=0;i<pipes.length;i++){
+    var p=pipes[i];
+    var r=p.D/12/2; // radius ft
+    var Af=Math.PI*r*r, Rf=r/2;
+    var Qfull=p.slope>0?(1.486/p.n)*Af*Math.pow(Rf,2/3)*Math.pow(p.slope,0.5):0;
+    var ratio=Qfull>0?Q/Qfull:999;
+    var pressurized=ratio>=1.0;
+    var yn=normalDepth(Q,p.D,p.slope,p.n);
+    var V=Af>0?Q/Af:0;
+    // Head losses use full-pipe geometry (per Excel methodology)
+    var hf=Rf>0?Math.pow(Q*p.n/(1.486*Af*Math.pow(Rf,2/3)),2)*p.L:0;
+    var he=p.ke*V*V/64.4;
+    var hx=p.kx*V*V/64.4;
+    var htot=hf+he+hx;
+    results.push({pipe:p,Qfull:Qfull,ratio:ratio,pressurized:pressurized,yn:yn,V:V,hf:hf,he:he,hx:hx,htot:htot});
+  }
+
+  // Chain HGL downstream to upstream
+  // Start: outfall boundary
+  var lastRes=results[results.length-1];
+  var lastYn=lastRes.yn;
+  // Free outfall: HGL_DS = outfall invert + normal depth
+  // Fixed tailwater: HGL_DS = tailwater elevation
+  var HGL_DS_outfall=tw!==null?tw:outInv+lastYn;
+
+  // Process DS to US, assign HGL_DS and HGL_US to each pipe
+  var hgl_ds=HGL_DS_outfall;
+  for(var i=results.length-1;i>=0;i--){
+    var res=results[i];
+    res.HGL_DS=hgl_ds;
+    res.HGL_US=hgl_ds+res.htot;
+    // For gravity flow, HGL should not be below the invert
+    // (pipe runs partially full - HGL is water surface inside pipe)
+    // If HGL_DS < DS_invert, pipe is running below grade (not possible physically - cap at invert)
+    if(res.HGL_DS<res.pipe.di) res.HGL_DS=res.pipe.di+res.yn;
+    if(res.HGL_US<res.pipe.ui) res.HGL_US=res.pipe.ui+res.yn;
+    // Flow depth at DS and US nodes
+    res.depth_DS=res.HGL_DS-res.pipe.di;
+    res.depth_US=res.HGL_US-res.pipe.ui;
+    // Status
+    var crown_US=res.pipe.ui+res.pipe.D/12;
+    var crown_DS=res.pipe.di+res.pipe.D/12;
+    res.flooding=res.pipe.rim>0&&res.HGL_US>res.pipe.rim;
+    res.surcharged=res.HGL_US>crown_US;
+    // Freeboard at US node
+    res.freeboard=res.pipe.rim>0?res.pipe.rim-res.HGL_US:null;
+    // Status text
+    if(res.flooding) res.status='<span style="color:#ef4444">⚠ Flooding</span>';
+    else if(res.pressurized) res.status='<span style="color:#a855f7">⚡ Pressurized</span>';
+    else if(res.ratio>0.85) res.status='<span style="color:#f59e0b">⚠ Near Capacity</span>';
+    else res.status='<span style="color:#22c55e">✓ OK</span>';
+    // Next pipe DS = this pipe US HGL
+    hgl_ds=res.HGL_US;
+  }
+
+  // Build results table
+  var hd='<thead><tr>'
+    +'<th>Pipe ID</th><th>Slope (ft/ft)</th><th>Qfull (cfs)</th><th>Q/Qfull</th><th>Regime</th>'
+    +'<th>Normal Depth (ft)</th><th>HGL at DS (ft)</th><th>HGL at US (ft)</th>'
+    +'<th>Freeboard (ft)</th><th>Velocity (ft/s)</th><th>hf (ft)</th><th>Total hL (ft)</th><th>Status</th>'
+    +'</tr></thead><tbody>';
+  var bd='';
+  results.forEach(function(res){
+    var p=res.pipe;
+    var regime=res.pressurized?'<span style="color:#a855f7">Pressurized</span>':'<span style="color:#22c55e">Gravity</span>';
+    var fb=res.freeboard!==null?res.freeboard.toFixed(2):'—';
+    bd+='<tr>'
+      +'<td>'+p.id+'</td>'
+      +'<td>'+p.slope.toFixed(6)+'</td>'
+      +'<td>'+res.Qfull.toFixed(2)+'</td>'
+      +'<td>'+res.ratio.toFixed(3)+'</td>'
+      +'<td>'+regime+'</td>'
+      +'<td>'+(res.pressurized?'Full':res.yn.toFixed(3))+'</td>'
+      +'<td>'+res.HGL_DS.toFixed(3)+'</td>'
+      +'<td>'+res.HGL_US.toFixed(3)+'</td>'
+      +'<td>'+fb+'</td>'
+      +'<td>'+res.V.toFixed(3)+'</td>'
+      +'<td>'+res.hf.toFixed(4)+'</td>'
+      +'<td>'+res.htot.toFixed(4)+'</td>'
+      +'<td>'+res.status+'</td>'
+      +'</tr>';
+  });
+
+  // Profile summary table
+  var profHd='<br><br><div class="ct">Profile Summary</div>'
+    +'<table><thead><tr><th>Node</th><th>Station (ft)</th><th>Rim (ft)</th>'
+    +'<th>Invert (ft)</th><th>Crown (ft)</th><th>HGL (ft)</th>'
+    +'<th>Flow Depth (ft)</th><th>Velocity (ft/s)</th><th>Regime</th><th>Status</th>'
+    +'</tr></thead><tbody>';
+  var profBd='',cumSta=0;
+  results.forEach(function(res,i){
+    var p=res.pipe;
+    if(i===0){
+      // US node of first pipe
+      profBd+='<tr><td>'+p.usNode+'</td><td>'+cumSta+'</td><td>'+(p.rim>0?p.rim.toFixed(2):'—')+'</td>'
+        +'<td>'+p.ui.toFixed(3)+'</td><td>'+(p.ui+p.D/12).toFixed(3)+'</td>'
+        +'<td>'+res.HGL_US.toFixed(3)+'</td><td>'+res.depth_US.toFixed(3)+'</td>'
+        +'<td>'+res.V.toFixed(3)+'</td>'
+        +'<td>'+(res.pressurized?'Pressurized':'Gravity')+'</td>'
+        +'<td>'+res.status+'</td></tr>';
+    }
+    cumSta+=p.L;
+    // DS node
+    profBd+='<tr><td>'+p.dsNode+'</td><td>'+cumSta+'</td><td>—</td>'
+      +'<td>'+p.di.toFixed(3)+'</td><td>'+(p.di+p.D/12).toFixed(3)+'</td>'
+      +'<td>'+res.HGL_DS.toFixed(3)+'</td><td>'+res.depth_DS.toFixed(3)+'</td>'
+      +'<td>'+res.V.toFixed(3)+'</td>'
+      +'<td>'+(res.pressurized?'Pressurized':'Gravity')+'</td>'
+      +'<td>'+res.status+'</td></tr>';
+  });
+
+  document.getElementById('hgl_res').style.display='block';
+  document.getElementById('hgl_rt').innerHTML=hd+bd+'</tbody>'+profHd+profBd+'</tbody></table>';
+  var Qshow=Qunit==='gpm'?Q_raw.toFixed(0)+' gpm ('+Q.toFixed(3)+' cfs)':Q.toFixed(3)+' cfs';
+  var bcNote=tw!==null?'Fixed tailwater='+tw.toFixed(2)+' ft':'Free outfall — HGL anchored at outfall invert ('+outInv.toFixed(3)+'ft) + normal depth';
+  document.getElementById('hgl_no').innerHTML='Q='+Qshow+' | Boundary: '+bcNote;
+
+  // Draw profile
+  var ve=parseFloat(gv('hgl_ve'))||1;
+  var _ym=document.getElementById('hgl_ymin').value.trim();
+  var _yx=document.getElementById('hgl_ymax').value.trim();
+  var _yt=document.getElementById('hgl_ytick').value.trim();
+  var ymin=(_ym===''||_ym==='0')?null:parseFloat(_ym);
+  var ymax=(_yx===''||_yx==='0')?null:parseFloat(_yx);
+  var ytick=(_yt===''||_yt==='0')?null:parseFloat(_yt);
+  drawHGLGravity(results,ve,ymin,ymax,ytick);
+}
+
+// ── Draw gravity pipe HGL profile ─────────────────────────────
+function drawHGLGravity(results,ve,userYmin,userYmax,userTick){
+  if(!results.length)return;
+  ve=Math.max(1,parseFloat(ve)||1);
+  var totalL=0;
+  results.forEach(function(r){totalL+=r.pipe.L;});
+
+  var W=Math.max(800,totalL/6+180); W=Math.min(W,1600);
+  var H=440,pad={l:90,r:35,t:35,b:70};
+  var svg=document.getElementById('hgl_svg');
+  clearSVG(svg);
+  svg.setAttribute('width',W); svg.setAttribute('height',H);
+  var pw=W-pad.l-pad.r, ph=H-pad.t-pad.b;
+
+  // Build station-elevation arrays for scaling
+  var allY=[],cumSta=0,profPts=[];
+  results.forEach(function(res,i){
+    var p=res.pipe;
+    if(i===0){
+      profPts.push({sta:cumSta,ui:p.ui,di:p.ui,crown:p.ui+p.D/12,hgl:res.HGL_US,rim:p.rim,res:res,isUS:true});
+      allY.push(p.ui,p.ui+p.D/12,res.HGL_US,p.rim);
+    }
+    cumSta+=p.L;
+    profPts.push({sta:cumSta,ui:p.di,di:p.di,crown:p.di+p.D/12,hgl:res.HGL_DS,rim:0,res:res,isUS:false});
+    allY.push(p.di,p.di+p.D/12,res.HGL_DS);
+  });
+
+  var dataMin=Math.min.apply(null,allY.filter(function(v){return v>0;}));
+  var dataMax=Math.max.apply(null,allY);
+  var dataSpan=Math.max(dataMax-dataMin,1);
+  var dataMid=(dataMin+dataMax)/2;
+
+  // Y axis range
+  var visMin,visMax;
+  if(userYmin!==null&&userYmax!==null){visMin=userYmin;visMax=userYmax;}
+  else if(userYmin!==null){visMin=userYmin;visMax=Math.max(dataMax+0.5,dataMid+(dataSpan/2)/ve+0.5);}
+  else if(userYmax!==null){visMax=userYmax;visMin=Math.min(dataMin-0.5,dataMid-(dataSpan/2)/ve-0.5);}
+  else{var hw=(dataSpan/2)/ve,ap=Math.max(0.3,dataSpan*0.05/ve);visMin=dataMid-hw-ap;visMax=dataMid+hw+ap;}
+  visMin=Math.min(visMin,dataMin-0.3);
+  visMax=Math.max(visMax,dataMax+0.3);
+  var visSpan=Math.max(visMax-visMin,0.1);
+
+  var xSc=makeScale(0,totalL,pad.l,pad.l+pw);
+  var ySc=makeScale(visMin,visMax,pad.t+ph,pad.t);
+
+  // Tick interval
+  var tickInt;
+  if(userTick!==null&&userTick>0){tickInt=userTick;}
+  else{
+    var rawInt=visSpan/7,mag=Math.pow(10,Math.floor(Math.log(rawInt)/Math.LN10));
+    var ns=[0.1,0.2,0.25,0.5,1,2,2.5,5,10,20,25,50,100];
+    tickInt=ns[ns.length-1]*mag;
+    for(var ni=0;ni<ns.length;ni++){if(ns[ni]*mag>=rawInt){tickInt=ns[ni]*mag;break;}}
+  }
+
+  // Grid + Y labels
+  var firstTick=Math.ceil((visMin-0.0001)/tickInt)*tickInt;
+  for(var tv=firstTick;tv<=visMax+tickInt*0.01;tv+=tickInt){
+    var yp=ySc(tv);
+    if(yp<pad.t-3||yp>pad.t+ph+3)continue;
+    svgLine(svg,pad.l,yp,pad.l+pw,yp,{stroke:'#253040','stroke-width':'0.8'});
+    var lbl=Math.round(tv/tickInt)*tickInt;
+    var dec=tickInt<1?(tickInt<0.1?2:1):0;
+    svgTxt(svg,pad.l-10,yp+4,lbl.toFixed(dec),{'text-anchor':'end','font-size':'12','fill':'#8fa0b0','font-weight':'500'});
+  }
+  var _rx=16,_ry=pad.t+ph/2;
+  svgTxt(svg,_rx,_ry,'Elevation (ft)',{'font-size':'13','fill':'#8fa0b0',transform:'rotate(-90,'+_rx+','+_ry+')'});
+
+  // X axis ticks
+  for(var xi=0;xi<=6;xi++){
+    var xv=totalL*xi/6,xp=xSc(xv);
+    svgLine(svg,xp,pad.t+ph,xp,pad.t+ph+5,{stroke:'#4a6070','stroke-width':'1'});
+    svgTxt(svg,xp,pad.t+ph+18,Math.round(xv)+"'",{'text-anchor':'middle','font-size':'11','fill':'#6a8090'});
+  }
+  svgTxt(svg,pad.l+pw/2,H-8,'Station (ft)',{'text-anchor':'middle','font-size':'12','fill':'#6a8090'});
+
+  // Rim / ground line
+  var rimPts=[];
+  profPts.forEach(function(pt){if(pt.rim>0)rimPts.push([xSc(pt.sta),ySc(pt.rim)]);});
+  if(rimPts.length>1){
+    var rd='M'+rimPts[0][0]+' '+rimPts[0][1];
+    for(var ri=1;ri<rimPts.length;ri++)rd+=' L'+rimPts[ri][0]+' '+rimPts[ri][1];
+    svgPath(svg,rd,{stroke:'#8fa0b0','stroke-width':'1.5','stroke-dasharray':'6,3',fill:'none'});
+  }
+
+  // Draw each pipe barrel (invert to crown), colored by regime
+  var cumS=0;
+  results.forEach(function(res){
+    var p=res.pipe;
+    var x0=xSc(cumS),x1=xSc(cumS+p.L);
+    cumS+=p.L;
+    var D_ft=p.D/12;
+    var fill=res.flooding?'#450a0a':res.pressurized?'#3b1d6e':'#1a2e1a';
+    var stroke=res.flooding?'#ef4444':res.pressurized?'#a855f7':'#22c55e';
+    // Pipe barrel polygon: invert and crown at US and DS
+    svgPoly(svg,[
+      [x0,ySc(p.ui+D_ft)],[x1,ySc(p.di+D_ft)],
+      [x1,ySc(p.di)],[x0,ySc(p.ui)]
+    ],{fill:fill,stroke:stroke,'stroke-width':'1.5','opacity':'0.9'});
+    // Centerline
+    svgLine(svg,x0,ySc(p.ui+D_ft/2),x1,ySc(p.di+D_ft/2),
+      {stroke:stroke,'stroke-width':'0.5','stroke-dasharray':'4,3','opacity':'0.6'});
+  });
+
+  // HGL line
+  var hd='M'+xSc(profPts[0].sta)+' '+ySc(profPts[0].hgl);
+  profPts.forEach(function(pt){hd+=' L'+xSc(pt.sta)+' '+ySc(pt.hgl);});
+  svgPath(svg,hd,{stroke:'#4a9eff','stroke-width':'3',fill:'none'});
+
+  // Node labels and HGL callouts
+  profPts.forEach(function(pt,i){
+    var xp=xSc(pt.sta);
+    var hglPx=ySc(pt.hgl);
+    var invPx=ySc(pt.di);
+    // Vertical station line
+    svgLine(svg,xp,pad.t,xp,pad.t+ph,{stroke:'#1f2e3e','stroke-width':'0.5'});
+    // Node name
+    var nm=pt.isUS?pt.res.pipe.usNode:pt.res.pipe.dsNode;
+    svgTxt(svg,xp,pad.t+ph+32,nm,{'text-anchor':'middle','font-size':'12','fill':'#8fa0b0','font-weight':'600'});
+    svgTxt(svg,xp,pad.t+ph+46,pt.sta+"'",{'text-anchor':'middle','font-size':'10','fill':'#4a6070'});
+    // HGL elevation label
+    if(hglPx>pad.t+10&&hglPx<pad.t+ph-5){
+      svgTxt(svg,xp,hglPx-7,pt.hgl.toFixed(2)+"'",{'text-anchor':'middle','font-size':'11','fill':'#4a9eff'});
+    }
+    // Invert label
+    if(invPx>pad.t+10&&invPx<pad.t+ph-5){
+      svgTxt(svg,xp,invPx+13,pt.di.toFixed(2)+"'",{'text-anchor':'middle','font-size':'10','fill':'#6a8090'});
+    }
+  });
+
+  // VE + scale info
+  svgTxt(svg,pad.l+pw-4,pad.t+16,'VE='+ve+'x  |  '+visMin.toFixed(1)+' – '+visMax.toFixed(1)+' ft  |  tick: '+tickInt+' ft',
+    {'text-anchor':'end','font-size':'11','fill':'#4a6070'});
+
+  // Axes
+  svgLine(svg,pad.l,pad.t,pad.l,pad.t+ph,{stroke:'#4a6070','stroke-width':'1.5'});
+  svgLine(svg,pad.l,pad.t+ph,pad.l+pw,pad.t+ph,{stroke:'#4a6070','stroke-width':'1.5'});
+}
+// ═══════════════════════════════════════════════════
+// SURGE
+// ═══════════════════════════════════════════════════
+function calcSG(){
+  var V=g('sg_V'),D=g('sg_D'),t=g('sg_t'),E=g('sg_E'),wp=g('sg_wp');
+  var a=4660/Math.sqrt(1+(300000/E)*(D/t));
+  var dP=a*V/32.2*62.4/144,pk=wp+dP,mn=wp-dP,DR=(D+2*t)/t;
+  document.getElementById('sg_res').style.display='block';
+  document.getElementById('sg_rv').innerHTML=
+    ri('Wave Speed a',a.toFixed(0),'ft/s')+
+    ri('Surge ΔP',dP.toFixed(1),'psi',dP>80?'bd':dP>50?'wn':'')+
+    ri('Peak Pressure',pk.toFixed(1),'psi',pk>wp/0.72?'bd':'')+
+    ri('Min. Pressure',mn.toFixed(1),'psi',mn<0?'wn':'')+
+    ri('Amplitude',(dP*2).toFixed(1),'psi')+
+    ri('Dim. Ratio DR',DR.toFixed(1),'');
+  document.getElementById('sg_no').innerHTML='Joukowsky formula. '+(pk>150?'<b style="color:#ef4444">Peak >150 psi — check pipe class.</b>':'Within typical range.')+(E<500000?' PVC: avg stress='+wp+' psi, amplitude='+dP.toFixed(0)+' psi — check UniBell fatigue chart.':'');
+}
+
+// ═══════════════════════════════════════════════════
+// SUBSURFACE DRAIN
+// ═══════════════════════════════════════════════════
+function calcSD(){
+  var K=g('sd_K'),q=g('sd_q'),m=g('sd_m')/12,d=g('sd_d')/12,sz=parseInt(gv('sd_sz')),gr=g('sd_gr'),le=g('sd_le'),dep=g('sd_dep')/12;
+  var Kf=K/12,qf=q/24/12;
+  var De=d/(1+(d/(Math.PI*(d+m)))*(Math.log(d/(sz/24))-0.423));De=Math.max(De,0.05);
+  var S=Math.sqrt((8*Kf*De*m+4*Kf*m*m)/qf);
+  var dr=sz/12,Ar=Math.PI*dr*dr/4,Rr=dr/4,Qr=(1.486/0.013)*Ar*Math.pow(Rr,2/3)*Math.pow(gr/100,0.5),Qg=Qr*449;
+  var qd=(q/12/24)*S*le*449;
+  document.getElementById('sd_res').style.display='block';
+  document.getElementById('sd_rv').innerHTML=
+    ri('Drain Spacing',S.toFixed(0),'ft',S<50?'wn':'')+
+    ri('Tube Capacity',Qg.toFixed(0),'gpm')+
+    ri('Design Flow/Drain',qd.toFixed(0),'gpm')+
+    ri('Capacity Ratio',(Qg/qd).toFixed(2),'(>1.0 OK)',Qg<qd?'bd':'ok')+
+    ri('Equiv. Depth De',(De*12).toFixed(1),'in')+
+    ri('Grade',gr,'%',gr<0.1?'bd':'');
+  document.getElementById('sd_no').innerHTML='Hooghoudt spacing='+S.toFixed(0)+' ft. '+sz+'" tube at '+gr+'%: '+Qg.toFixed(0)+' gpm. '+(Qg>=qd?'Adequate.':'<b style="color:#ef4444">Undersized.</b>');
+  drawSubDrainSection(dep,m,d,sz/12,S,g('sd_m')/12);
+}
+
+function drawSubDrainSection(dep,m_ft,d_ft,drDia,spacing,midWT_ft){
+  var svg=document.getElementById('sd_svg');
+  clearSVG(svg);
+  var W=720,H=300,pad={l:60,r:20,t:20,b:30};
+  svg.setAttribute('width',W);svg.setAttribute('height',H);
+  var pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
+  var totalDepth=dep+d_ft+1;
+  var scaleFactor=ph/totalDepth;
+  function yPx(db){return pad.t+db*scaleFactor;}
+  var xL=pad.l+pw*0.2,xR=pad.l+pw*0.8;
+  var ySurf=yPx(0),yDrain=yPx(dep),yImperm=yPx(dep+d_ft);
+  svgRect(svg,pad.l,ySurf,pw,yImperm-ySurf,{fill:'#1a1208',opacity:'0.9'});
+  svgRect(svg,pad.l,yImperm,pw,pad.t+ph-yImperm,{fill:'#2a1f0e'});
+  for(var xi=0;xi<pw;xi+=12){svgLine(svg,pad.l+xi,yImperm,pad.l+xi+8,yImperm+8,{stroke:'#4a3010','stroke-width':'1'});}
+  svgTxt(svg,pad.l+pw/2,yImperm+14,'Impermeable Layer',{'text-anchor':'middle','fill':'#8B6914','font-size':'10'});
+  var nPts=40,wt_pts=[];
+  for(var pi=0;pi<=nPts;pi++){
+    var frac=pi/nPts,xp=xL+(xR-xL)*frac;
+    var rise=4*midWT_ft*(frac-frac*frac);
+    wt_pts.push([xp,yPx(dep-rise)]);
+  }
+  var wfPts=wt_pts.slice();
+  wfPts.push([xR,yDrain],[xL,yDrain]);
+  svgPoly(svg,wfPts,{fill:'#0a2a4a',opacity:'0.7'});
+  var wtd='M'+wt_pts[0][0]+' '+wt_pts[0][1];
+  for(var pi2=1;pi2<wt_pts.length;pi2++)wtd+=' L'+wt_pts[pi2][0]+' '+wt_pts[pi2][1];
+  svgPath(svg,wtd,{stroke:'#4a9eff','stroke-width':'2',fill:'none','stroke-dasharray':'5,3'});
+  svgTxt(svg,pad.l+pw/2,yPx(dep-midWT_ft)-5,'Water Table',{'text-anchor':'middle','fill':'#4a9eff','font-size':'9'});
+  svgLine(svg,pad.l,ySurf,pad.l+pw,ySurf,{stroke:'#8fa0b0','stroke-width':'2.5'});
+  svgTxt(svg,pad.l+pw-2,ySurf-5,'Ground Surface',{'text-anchor':'end','fill':'#8fa0b0','font-size':'9'});
+  var drR=Math.max(4,drDia*scaleFactor/2);
+  [xL,xR].forEach(function(xd){
+    var c=svgEl('circle',{cx:xd,cy:yDrain,r:drR,fill:'#253f5a',stroke:'#4a9eff','stroke-width':'1.5'});
+    svg.appendChild(c);
+    svgTxt(svg,xd,yDrain+drR+12,(drDia*12).toFixed(0)+'"',{'text-anchor':'middle','fill':'#4a9eff','font-size':'8'});
+  });
+  svgLine(svg,pad.l+8,ySurf,pad.l+8,yDrain,{stroke:'#e6a817','stroke-width':'1','stroke-dasharray':'3,2'});
+  svgLine(svg,pad.l+4,ySurf,pad.l+12,ySurf,{stroke:'#e6a817','stroke-width':'1'});
+  svgLine(svg,pad.l+4,yDrain,pad.l+12,yDrain,{stroke:'#e6a817','stroke-width':'1'});
+  svgTxt(svg,pad.l+20,(ySurf+yDrain)/2,'Drain Depth '+(dep*12).toFixed(0)+'"',{'fill':'#e6a817','font-size':'9'});
+  svgLine(svg,pad.l+8,yDrain,pad.l+8,yImperm,{stroke:'#888','stroke-width':'1','stroke-dasharray':'3,2'});
+  svgTxt(svg,pad.l+20,(yDrain+yImperm)/2,'d='+(d_ft*12).toFixed(0)+'"',{'fill':'#8fa0b0','font-size':'9'});
+  svgLine(svg,xL,yDrain+drR+20,xR,yDrain+drR+20,{stroke:'#e6a817','stroke-width':'1'});
+  svgTxt(svg,(xL+xR)/2,yDrain+drR+32,'Spacing = '+Math.round(spacing)+" ft (schematic)",{'text-anchor':'middle','fill':'#e6a817','font-size':'9'});
+  svgLine(svg,pad.l,pad.t,pad.l,pad.t+ph,{stroke:'#253040','stroke-width':'1'});
+}
+
+// ═══════════════════════════════════════════════════
+// CULVERT
+// ═══════════════════════════════════════════════════
+function calcCV(){
+  var Q=g('cv_Q'),Din=g('cv_D'),L=g('cv_L'),S=g('cv_S')/100,Ke=parseFloat(gv('cv_ke')),TW=g('cv_TW'),HWm=g('cv_HW'),emb=g('cv_emb');
+  var ty=gv('cv_ty'),n=ty==='cmp'?0.024:ty==='hdpe'?0.012:0.013;
+  var D=Din/12,A=Math.PI*D*D/4,R=D/4,Qf=(1.486/n)*A*Math.pow(R,2/3)*Math.pow(S,0.5),V=Q/A;
+  var rt=Q/(A*Math.sqrt(D)),HWi=(0.0078*rt*rt+0.61-0.5*S)*D;
+  var hf=n*n*V*V*L/Math.pow(R,4/3),HWo=Math.max(TW+hf+(1+Ke)*V*V/64.4-S*L,0);
+  var HW=Math.max(HWi,HWo),HWin=HW*12,rh=HWin/Din,ctrl=HWi>HWo?'Inlet Control':'Outlet Control',ok=HWin<=HWm;
+  document.getElementById('cv_res').style.display='block';
+  document.getElementById('cv_rv').innerHTML=
+    ri('Full-Flow Cap.',Qf.toFixed(1),'cfs',Q>Qf?'wn':'')+
+    ri('Q / Capacity',(Q/Qf*100).toFixed(0),'%',Q/Qf>0.85?'wn':'')+
+    ri('Headwater HW',HWin.toFixed(1),'inches',ok?'ok':'bd')+
+    ri('HW:D Ratio',rh.toFixed(2),'',rh>1.5?'bd':rh>1.2?'wn':'ok')+
+    ri('Controls',ctrl,'')+
+    ri('Outlet Velocity',V.toFixed(2),'ft/s',V>10?'wn':'');
+  document.getElementById('cv_no').innerHTML=ctrl+'. HW='+HWin.toFixed(1)+'in '+(ok?'OK':'<b style="color:#ef4444">Exceeds '+HWm+'in — upsize or add barrel</b>')+'. V='+V.toFixed(1)+' ft/s'+(V>8?' — riprap required.':'.');
+  drawCulvertProfile(D,L,S,HW,TW,emb,ctrl,Qf,Q,V);
+}
+
+function drawCulvertProfile(D,L,S,HW,TW,emb,ctrl,Qf,Q,V){
+  var W=720,H=300,pad={l:50,r:40,t:20,b:40};
+  var svg=document.getElementById('cv_svg');
+  clearSVG(svg);
+  svg.setAttribute('width',W);svg.setAttribute('height',H);
+  var pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
+  var inletInv=0,outletInv=-S*L;
+  var yMax=Math.max(HW,emb+D)+0.5,yMin=Math.min(outletInv-1,-TW-0.5);
+  var xSc=makeScale(0,L,pad.l,pad.l+pw);
+  var ySc=makeScale(yMin,yMax,pad.t+ph,pad.t);
+  // Embankment fill
+  svgPoly(svg,[
+    [pad.l-30,ySc(inletInv)],[pad.l+pw+30,ySc(outletInv)],
+    [pad.l+pw+30,ySc(outletInv+emb)],[pad.l+pw/2+pw*0.3,ySc(Math.max(emb,outletInv+emb)+0.3)],
+    [pad.l+pw/2,ySc(emb)],[pad.l+pw/2-pw*0.3,ySc(Math.max(emb,inletInv+emb)+0.3)],
+    [pad.l-30,ySc(inletInv+emb)]
+  ],{fill:'#1a1208',opacity:'0.9'});
+  // Pipe barrel
+  svgPoly(svg,[
+    [xSc(0),ySc(inletInv+D)],[xSc(L),ySc(outletInv+D)],
+    [xSc(L),ySc(outletInv)],[xSc(0),ySc(inletInv)]
+  ],{fill:'#253f5a',stroke:'#4a9eff','stroke-width':'1.5'});
+  // Headwalls
+  svgLine(svg,xSc(0),ySc(inletInv+D+0.5),xSc(0),ySc(inletInv-0.3),{stroke:'#8fa0b0','stroke-width':'4'});
+  svgLine(svg,xSc(L),ySc(outletInv+D+0.5),xSc(L),ySc(outletInv-0.3),{stroke:'#8fa0b0','stroke-width':'4'});
+  // Headwater
+  var hwElev=inletInv+HW;
+  svgRect(svg,pad.l-30,ySc(hwElev),xSc(0)-pad.l+30,ySc(inletInv)-ySc(hwElev),{fill:'#0a2a4a',opacity:'0.8'});
+  svgLine(svg,pad.l-30,ySc(hwElev),xSc(0),ySc(hwElev),{stroke:'#4a9eff','stroke-width':'2'});
+  svgTxt(svg,pad.l-20,ySc(hwElev)-4,'HW='+(HW*12).toFixed(1)+'"',{'fill':'#4a9eff','font-size':'9'});
+  // Tailwater
+  if(TW>0){
+    var twElev=outletInv+TW;
+    svgRect(svg,xSc(L),ySc(twElev),pad.l+pw+pad.r-xSc(L)+20,ySc(outletInv)-ySc(twElev),{fill:'#0a2a4a',opacity:'0.6'});
+    svgLine(svg,xSc(L),ySc(twElev),pad.l+pw+20,ySc(twElev),{stroke:'#4a9eff','stroke-width':'1.5','stroke-dasharray':'4,2'});
+    svgTxt(svg,pad.l+pw+22,ySc(twElev)+3,'TW='+TW.toFixed(1)+"'",{'fill':'#4a9eff','font-size':'9'});
+  }
+  // HGL inside pipe
+  var hglIn=inletInv+HW,hglOut=outletInv+Math.max(TW,D*0.6);
+  svgLine(svg,xSc(0),ySc(hglIn),xSc(L),ySc(hglOut),{stroke:'#22c55e','stroke-width':'1.5','stroke-dasharray':'5,3'});
+  svgTxt(svg,xSc(L/2),ySc((hglIn+hglOut)/2)-4,'HGL',{'text-anchor':'middle','fill':'#22c55e','font-size':'9'});
+  // Labels
+  svgTxt(svg,xSc(0)-5,ySc(inletInv+D/2),'Inlet',{'text-anchor':'end','fill':'#8fa0b0','font-size':'9'});
+  svgTxt(svg,xSc(L)+5,ySc(outletInv+D/2),'Outlet',{'fill':'#8fa0b0','font-size':'9'});
+  svgTxt(svg,xSc(L/2),H-10,ctrl+' | Q='+Q.toFixed(0)+' cfs | Qfull='+Qf.toFixed(1)+' cfs | V='+V.toFixed(1)+' ft/s',{'text-anchor':'middle','fill':'#4a6070','font-size':'9'});
+  // Y axis labels
+  for(var i=0;i<=4;i++){
+    var yv=yMin+(yMax-yMin)*i/4;
+    svgLine(svg,pad.l-3,ySc(yv),pad.l,ySc(yv),{stroke:'#4a6070','stroke-width':'1'});
+    svgTxt(svg,pad.l-5,ySc(yv)+3,yv.toFixed(1),{'text-anchor':'end','font-size':'8','fill':'#4a6070'});
+  }
+  svgLine(svg,pad.l,pad.t,pad.l,pad.t+ph,{stroke:'#253040','stroke-width':'1'});
+  svgLine(svg,pad.l,pad.t+ph,pad.l+pw,pad.t+ph,{stroke:'#253040','stroke-width':'1'});
+}
+
+// ═══════════════════════════════════════════════════
+// OPEN CHANNEL
+// ═══════════════════════════════════════════════════
+function calcOC(){
+  var sh=gv('oc_sh'),n=g('oc_n'),b=g('oc_b'),z=g('oc_z'),S=g('oc_S')/100,y=g('oc_y'),Qk=g('oc_Q'),fb=g('oc_fb');
+  var D=b;
+  function circAP(yy){
+    yy=Math.max(0.001,Math.min(yy,D-0.001));
+    var r=D/2,h=yy-r,theta=2*Math.acos(-h/r);
+    var A=r*r*(theta-Math.sin(theta))/2,P=r*theta;
+    return{A:A,P:P,R:A/P,theta:theta};
+  }
+  function ap(yy){
+    if(sh==='circ')return circAP(yy);
+    var A,P;
+    if(sh==='trap'){A=(b+z*yy)*yy;P=b+2*yy*Math.sqrt(1+z*z);}
+    else if(sh==='tri'){A=z*yy*yy;P=2*yy*Math.sqrt(1+z*z);}
+    else{A=b*yy;P=b+2*yy;}
+    return{A:A,P:P,R:A/P};
+  }
+  function Qat(yy){var r=ap(yy);return(1.486/n)*r.A*Math.pow(r.R,2/3)*Math.pow(S,0.5);}
+  var hiY=sh==='circ'?D*0.999:50;
+  var yc=y,Qo;
+  if(Qk>0){
+    var lo=0.001,hi=hiY,m2;
+    for(var i=0;i<80;i++){m2=(lo+hi)/2;Qat(m2)<Qk?lo=m2:hi=m2;}
+    yc=m2;Qo=Qk;
+  } else {
+    if(sh==='circ')yc=Math.min(y,D*0.999);
+    Qo=Qat(yc);
+  }
+  var r=ap(yc),V=Qo/r.A,Fr=V/Math.sqrt(32.2*yc),vc=V*V/(2*32.2);
+  var Qfull=sh==='circ'?Qat(D*0.999):null;
+  var pctFull=Qfull?Qo/Qfull*100:null;
+  document.getElementById('oc_res').style.display='block';
+  var extra=sh==='circ'?ri('Full-Pipe Capacity',Qfull.toFixed(2),'cfs')+ri('Flow / Full-Pipe',pctFull.toFixed(1),'%',pctFull>90?'wn':''):'';
+  document.getElementById('oc_rv').innerHTML=
+    ri('Normal Depth',yc.toFixed(2),'ft')+
+    ri('Discharge Q',Qo.toFixed(2),'cfs')+
+    ri('Velocity V',V.toFixed(2),'ft/s',V>6?'wn':'')+
+    ri('Flow Area',r.A.toFixed(2),'ft²')+
+    ri('Hydraulic Radius',r.R.toFixed(3),'ft')+
+    ri('Velocity Head V²/2g',vc.toFixed(3),'ft')+
+    ri('Froude Number',Fr.toFixed(3),Fr>1?'Supercritical':'Subcritical',Fr>1?'wn':'')+extra;
+  document.getElementById('oc_no').innerHTML='n='+n+', S='+(S*100).toFixed(2)+'%'+(sh==='circ'?' D='+D+"ft, y/D="+(yc/D).toFixed(3)+' ('+pctFull.toFixed(1)+'% full).':'. '+(Fr<1?'Subcritical':'<b>Supercritical</b>')+' flow.')+(V>6?' V>6 ft/s — verify lining.':'');
+  drawChannelSection(sh,b,z,yc,fb,V,S,Fr,vc,Qo,n);
+}
+
+function drawChannelSection(sh,b,z,y,fb,V,S,Fr,vc,Qo,n){
+  var W=720,H=340,pad={l:70,r:50,t:30,b:50};
+  var D=b;
+  var svg=document.getElementById('oc_svg');
+  clearSVG(svg);
+  svg.setAttribute('width',W);svg.setAttribute('height',H);
+  var pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
+  if(sh==='circ'){
+    var cx=pad.l+pw/2,cy=pad.t+ph/2;
+    var maxR=Math.min(pw,ph)/2*0.75,scl=maxR/(D/2),r=D/2*scl;
+    svgRect(svg,pad.l,pad.t,pw,ph,{fill:'#1a1208'});
+    var pc=svgEl('circle',{cx:cx,cy:cy,r:r,fill:'#0f1923',stroke:'#8B6914','stroke-width':'2'});
+    svg.appendChild(pc);
+    var yDepth=y*scl,yTop=cy+r-yDepth,halfChord=Math.sqrt(Math.max(0,r*r-Math.pow(r-yDepth,2)));
+    var xL=cx-halfChord,xR=cx+halfChord,yBot=cy+r;
+    if(y>0&&y<D){
+      var largeArc=y>D/2?1:0;
+      var watPath='M'+xL+' '+yTop+' A'+r+' '+r+' 0 '+largeArc+' 1 '+xR+' '+yTop+' L'+xR+' '+yBot+' A'+r+' '+r+' 0 1 0 '+xL+' '+yBot+' Z';
+      svgPath(svg,watPath,{fill:'#0a2a4a',opacity:'0.85'});
+    } else if(y>=D){
+      var fc=svgEl('circle',{cx:cx,cy:cy,r:r,fill:'#0a2a4a',opacity:'0.85'});svg.appendChild(fc);
+    }
+    var pc2=svgEl('circle',{cx:cx,cy:cy,r:r,fill:'none',stroke:'#4a9eff','stroke-width':'2.5'});svg.appendChild(pc2);
+    if(y>0&&y<D){
+      svgLine(svg,xL,yTop,xR,yTop,{stroke:'#4a9eff','stroke-width':'2'});
+      svgTxt(svg,xR+6,yTop+3,'WSE',{'fill':'#4a9eff','font-size':'9'});
+      var eglPx=yTop-vc*scl;
+      svgLine(svg,xL,eglPx,xR,eglPx,{stroke:'#22c55e','stroke-width':'1.5','stroke-dasharray':'5,3'});
+      svgTxt(svg,xR+6,eglPx+3,'EGL',{'fill':'#22c55e','font-size':'9'});
+      svgLine(svg,xR+2,yTop,xR+2,eglPx,{stroke:'#e6a817','stroke-width':'1'});
+    }
+    svgLine(svg,cx-r,cy,cx+r,cy,{stroke:'#e6a817','stroke-width':'1','stroke-dasharray':'4,2'});
+    svgTxt(svg,cx,cy-6,'D='+D+"'",{'text-anchor':'middle','fill':'#e6a817','font-size':'10'});
+    svgLine(svg,cx-r-20,yBot,cx-r-20,yTop,{stroke:'#e6a817','stroke-width':'1'});
+    svgLine(svg,cx-r-24,yBot,cx-r-16,yBot,{stroke:'#e6a817','stroke-width':'1'});
+    svgLine(svg,cx-r-24,yTop,cx-r-16,yTop,{stroke:'#e6a817','stroke-width':'1'});
+    svgTxt(svg,cx-r-26,(yBot+yTop)/2+3,'y='+y.toFixed(2)+"'",{'text-anchor':'end','fill':'#e6a817','font-size':'9'});
+    svgTxt(svg,cx,cy+r+16,'y/D='+(y/D).toFixed(3)+' ('+( y/D*100).toFixed(1)+'% full)',{'text-anchor':'middle','fill':'#8fa0b0','font-size':'9'});
+    svgTxt(svg,pad.l+pw/2,H-10,'Q='+Qo.toFixed(2)+' cfs  V='+V.toFixed(2)+' ft/s  Fr='+Fr.toFixed(3)+'  n='+n+'  S='+(S*100).toFixed(2)+'%',{'text-anchor':'middle','fill':'#4a6070','font-size':'9'});
+    return;
+  }
+  var bankH=Math.max(fb,y*1.3),topW=sh==='rect'?b:sh==='tri'?2*z*bankH:b+2*z*bankH;
+  var waterTopW=sh==='rect'?b:sh==='tri'?2*z*y:b+2*z*y;
+  var xCenter=pad.l+pw/2,scaleH=ph/bankH,scaleW=Math.min(pw/(topW+4),scaleH*2);
+  function px(ft){return xCenter+ft*scaleW;}
+  function py(ftUp){return pad.t+ph-ftUp*scaleH;}
+  var chPts=[];
+  if(sh==='trap'){chPts=[[px(-topW/2),py(bankH)],[px(-b/2-z*bankH),py(bankH)],[px(-b/2),py(0)],[px(b/2),py(0)],[px(b/2+z*bankH),py(bankH)],[px(topW/2),py(bankH)]];}
+  else if(sh==='tri'){chPts=[[px(-topW/2),py(bankH)],[px(0),py(0)],[px(topW/2),py(bankH)]];}
+  else{chPts=[[px(-b/2),py(bankH)],[px(-b/2),py(0)],[px(b/2),py(0)],[px(b/2),py(bankH)]];}
+  var soilPts=chPts.concat([[px(topW/2+2),py(bankH)],[px(topW/2+2),py(-0.2)],[px(-topW/2-2),py(-0.2)],[px(-topW/2-2),py(bankH)]]);
+  svgPoly(svg,soilPts,{fill:'#1a1208'});
+  svgPoly(svg,chPts,{fill:'#0f1923',stroke:'#8B6914','stroke-width':'2'});
+  var watPts=[];
+  if(sh==='trap'){watPts=[[px(-waterTopW/2),py(y)],[px(-b/2-z*y),py(y)],[px(-b/2),py(0)],[px(b/2),py(0)],[px(b/2+z*y),py(y)],[px(waterTopW/2),py(y)]];}
+  else if(sh==='tri'){watPts=[[px(-waterTopW/2),py(y)],[px(0),py(0)],[px(waterTopW/2),py(y)]];}
+  else{watPts=[[px(-b/2),py(y)],[px(-b/2),py(0)],[px(b/2),py(0)],[px(b/2),py(y)]];}
+  svgPoly(svg,watPts,{fill:'#0a2a4a',opacity:'0.85'});
+  var wseX1=px(-waterTopW/2-1),wseX2=px(waterTopW/2+1);
+  svgLine(svg,wseX1,py(y),wseX2,py(y),{stroke:'#4a9eff','stroke-width':'2.5'});
+  svgTxt(svg,wseX2+4,py(y)+3,'WSE',{'fill':'#4a9eff','font-size':'9'});
+  var eglY=y+vc;
+  svgLine(svg,wseX1,py(eglY),wseX2,py(eglY),{stroke:'#22c55e','stroke-width':'1.5','stroke-dasharray':'6,3'});
+  svgTxt(svg,wseX2+4,py(eglY)+3,'EGL',{'fill':'#22c55e','font-size':'9'});
+  svgLine(svg,wseX2-10,py(y),wseX2-10,py(eglY),{stroke:'#e6a817','stroke-width':'1'});
+  svgTxt(svg,wseX2-8,py((y+eglY)/2),'V²/2g='+vc.toFixed(3)+"'",{'fill':'#e6a817','font-size':'8'});
+  if(bankH>y){
+    svgLine(svg,px(topW/2+0.5),py(y),px(topW/2+0.5),py(bankH),{stroke:'#e6a817','stroke-width':'1','stroke-dasharray':'3,2'});
+    svgTxt(svg,px(topW/2+0.8),(py(y)+py(bankH))/2,'FB='+(bankH-y).toFixed(2)+"'",{'fill':'#e6a817','font-size':'8'});
+  }
+  svgLine(svg,px(-b/2-z*y)-16,py(0),px(-b/2-z*y)-16,py(y),{stroke:'#e6a817','stroke-width':'1'});
+  svgLine(svg,px(-b/2-z*y)-20,py(0),px(-b/2-z*y)-12,py(0),{stroke:'#e6a817','stroke-width':'1'});
+  svgLine(svg,px(-b/2-z*y)-20,py(y),px(-b/2-z*y)-12,py(y),{stroke:'#e6a817','stroke-width':'1'});
+  svgTxt(svg,px(-b/2-z*y)-34,py(y/2)+3,'y='+y.toFixed(2)+"'",{'fill':'#e6a817','font-size':'9','text-anchor':'end'});
+  if(b>0){svgLine(svg,px(-b/2),py(-0.12),px(b/2),py(-0.12),{stroke:'#8fa0b0','stroke-width':'1'});svgTxt(svg,px(0),py(-0.2),'b='+b+"'",{'text-anchor':'middle','fill':'#8fa0b0','font-size':'9'});}
+  svgLine(svg,px(-waterTopW/2),py(y+0.15),px(waterTopW/2),py(y+0.15),{stroke:'#4a9eff','stroke-width':'1'});
+  svgTxt(svg,px(0),py(y+0.25),'T='+waterTopW.toFixed(2)+"'",{'text-anchor':'middle','fill':'#4a9eff','font-size':'9'});
+  if(z>0&&sh!=='rect'){svgTxt(svg,px(-b/2-z*y/2),py(y/2),'z='+z,{'text-anchor':'middle','fill':'#8fa0b0','font-size':'9'});}
+  svgTxt(svg,pad.l+pw/2,H-12,'Q='+Qo.toFixed(2)+' cfs  V='+V.toFixed(2)+' ft/s  Fr='+Fr.toFixed(3)+'  n='+n+'  S='+(S*100).toFixed(2)+'%',{'text-anchor':'middle','fill':'#4a6070','font-size':'9'});
+}
+
+// ═══════════════════════════════════════════════════
+// RIPRAP
+// ═══════════════════════════════════════════════════
+function calcRR(){
+  var me=gv('rr_me'),fc=parseFloat(gv('rr_sh')),V=g('rr_V'),y=g('rr_y'),S=g('rr_S')/100,z=g('rr_z'),sg=g('rr_sg'),sf=g('rr_sf');
+  var d5f;
+  if(me==='vel'){d5f=Math.pow(V,2.5)*sf/(10.23*Math.pow(sg-1,1.25)*Math.pow(y,0.25));}
+  else{var tau=62.4*y*S,ts=tau*Math.cos(Math.atan(1/z))*(1-Math.pow(Math.sin(Math.atan(1/z)),2)/Math.pow(Math.sin(33.5*Math.PI/180),2));d5f=Math.max(tau,ts)*sf/(0.047*(sg-1)*62.4);}
+  var d5i=d5f*12*fc,th=Math.max(12,1.5*d5i);
+  document.getElementById('rr_res').style.display='block';
+  document.getElementById('rr_rv').innerHTML=ri('Required D50',d5i.toFixed(1),'inches')+ri('D50 (feet)',(d5i/12).toFixed(3),'ft')+ri('NRCS Class',rrc(d5i),'')+ri('Min. Thickness',th.toFixed(0),'inches')+ri('Bed Shear',(62.4*y*S).toFixed(3),'lb/ft²')+ri('Safety Factor',sf,'');
+  document.getElementById('rr_no').innerHTML=(me==='vel'?'NRCS EFH Ch.16':'EM 1110-2-1601')+' method. Sg='+sg+', SF='+sf+'.'+(fc>1?' Factor '+fc+'× applied.':'')+' Filter fabric required.';
+}
+
+// ═══════════════════════════════════════════════════
+// VEG LINED
+// ═══════════════════════════════════════════════════
+function calcVG(){
+  var cv=gv('vg_cv'),so=parseFloat(gv('vg_so')),b=g('vg_b'),z=g('vg_z'),S=g('vg_S')/100,y=g('vg_y');
+  var pm={bermuda_good:[6,8],bermuda_fair:[4,6],kentucky:[4,6],native_good:[5,7],native_fair:[3,5],sorghum:[3,5],small_grain:[2,3.5]};
+  var pv=pm[cv]||[3,5],pV=pv[0]+(pv[1]-pv[0])*so;
+  var ng=cv.indexOf('bermuda')>=0?0.040:cv.indexOf('native')>=0?0.035:0.030;
+  var A=(b+z*y)*y,P=b+2*y*Math.sqrt(1+z*z),R=A/P,Q=(1.486/ng)*A*Math.pow(R,2/3)*Math.pow(S,0.5),V=Q/A,ok=V<=pV;
+  document.getElementById('vg_res').style.display='block';
+  document.getElementById('vg_rv').innerHTML=ri('Design Velocity',V.toFixed(2),'ft/s',ok?'ok':'bd')+ri('Permissible Velocity',pV.toFixed(1),'ft/s')+ri('Margin',(pV-V).toFixed(2),'ft/s',ok?'ok':'bd')+ri('Discharge Q',Q.toFixed(2),'cfs')+ri('Manning n',ng,'')+ri('VR Product',(V*R).toFixed(2),'ft²/s');
+  document.getElementById('vg_no').innerHTML=(ok?'Velocity within permissible limit.':'<b style="color:#ef4444">Exceeds limit — reduce slope, widen, or riprap.</b>')+' Check interim construction condition.';
+}
+
+// ═══════════════════════════════════════════════════
+// RUNOFF / CN
+// ═══════════════════════════════════════════════════
+function calcRO(){
+  var A=g('ro_A'),CN=g('ro_CN'),P=g('ro_P'),am=gv('ro_AM'),Tc=g('ro_Tc'),Ia=g('ro_Ia');
+  var CN2=CN;if(am==='dry')CN2=4.2*CN/(10-0.058*CN);if(am==='wet')CN2=23*CN/(10+0.13*CN);
+  var S=1000/CN2-10,Iav=Ia*S,Qr=P>Iav?Math.pow(P-Iav,2)/(P-Iav+S):0;
+  var Th=Tc/60,qu=Math.pow(10,2.55-0.61*Math.log10(Th)-0.0028*Math.pow(Math.log10(Th),2)),qp=qu*(A/640)*Qr;
+  document.getElementById('ro_res').style.display='block';
+  document.getElementById('ro_rv').innerHTML=ri('Adjusted CN',CN2.toFixed(1),'('+am+')')+ri('Retention S',S.toFixed(2),'in')+ri('Init. Abstraction',Iav.toFixed(2),'in')+ri('Runoff Depth Q',Qr.toFixed(2),'in')+ri('Runoff Volume',(Qr*A/12).toFixed(2),'acre-ft')+ri('Est. Peak Q',qp.toFixed(1),'cfs');
+  document.getElementById('ro_no').innerHTML='CN='+CN2.toFixed(1)+'. '+(P<=Iav?'P < Ia — no runoff.':'Q='+Qr.toFixed(2)+'" from '+P+'" storm.');
+}
+
+// ═══════════════════════════════════════════════════
+// TIME OF CONCENTRATION
+// ═══════════════════════════════════════════════════
+function calcTC(){
+  var n1=g('tc_n1'),L1=g('tc_L1'),P2=g('tc_P2'),s1=g('tc_s1')/100;
+  var st=gv('tc_st'),L2=g('tc_L2'),s2=g('tc_s2')/100;
+  var n3=g('tc_n3'),A3=g('tc_A3'),P3=g('tc_P3'),L3=g('tc_L3'),s3=g('tc_s3')/100;
+  var T1=0.007*Math.pow(n1*L1,0.8)/(Math.pow(P2,0.5)*Math.pow(s1,0.4))*60;
+  var V2=st==='paved'?20.3282*Math.sqrt(s2):16.1345*Math.sqrt(s2),T2=L2/V2/60;
+  var V3=(1.486/n3)*Math.pow(A3/P3,2/3)*Math.pow(s3,0.5),T3=L3/V3/60;
+  var Tt=T1+T2+T3;
+  document.getElementById('tc_res').style.display='block';
+  document.getElementById('tc_rv').innerHTML=ri('Sheet Flow Tt1',T1.toFixed(1),'min')+ri('Shallow V',V2.toFixed(2),'ft/s')+ri('Shallow Flow Tt2',T2.toFixed(1),'min')+ri('Channel V',V3.toFixed(2),'ft/s')+ri('Channel Flow Tt3',T3.toFixed(1),'min')+ri('Total Tc',Tt.toFixed(1),'min',Tt<10?'wn':'');
+  document.getElementById('tc_no').innerHTML=(L1>300?'<b style="color:#f59e0b">L1 exceeds 300 ft max.</b> ':'')+'Total Tc='+Tt.toFixed(1)+' min.';
+}
+
+// ═══════════════════════════════════════════════════
+// WEIR / ORIFICE
+// ═══════════════════════════════════════════════════
+function calcWO(){
+  var ty=gv('wo_ty'),L=g('wo_L'),H=g('wo_H'),Cd=g('wo_Cd'),nc=g('wo_n'),Q=0;
+  if(ty==='rect_sc'){Q=Cd*(2/3)*Math.sqrt(64.4)*(L-0.1*nc*H)*Math.pow(H,1.5);}
+  else if(ty==='rect_bc'){Q=Cd*(2/3)*Math.sqrt(64.4)*L*Math.pow(H,1.5);}
+  else if(ty==='vnotch'){Q=(8/15)*Cd*Math.sqrt(64.4)*Math.pow(H,2.5);}
+  else if(ty==='cip'){Q=1.859*L*Math.pow(H,1.5);}
+  else{Q=Cd*Math.PI*Math.pow(L/2,2)*Math.sqrt(64.4*H);}
+  document.getElementById('wo_res').style.display='block';
+  document.getElementById('wo_rv').innerHTML=ri('Discharge Q',Q.toFixed(3),'cfs')+ri('Discharge Q',(Q*449).toFixed(0),'gpm')+ri('Head H',H.toFixed(2),'ft')+ri('Crest / Dia.',L.toFixed(2),'ft')+ri('Cd',Cd,'')+ri('Velocity',(Q/Math.max(L*H,0.01)).toFixed(2),'ft/s');
+  document.getElementById('wo_no').innerHTML=Q.toFixed(3)+' cfs = '+(Q*449).toFixed(0)+' gpm at H='+H.toFixed(2)+' ft.';
+}
+
+// ═══════════════════════════════════════════════════
+// GRADE STABILIZER / DROP
+// ═══════════════════════════════════════════════════
+function calcDR(){
+  var Q=g('dr_Q'),h=g('dr_h'),L=g('dr_L'),Vu=g('dr_Vu'),d5=g('dr_d5'),Sg=g('dr_Sg');
+  var Vb=Math.sqrt(Vu*Vu+2*32.2*h),yt=Q/(Vb*Math.max(L,1));
+  var d5f=Math.pow(Vb,2.5)/(10.23*Math.pow(Sg-1,1.25)*Math.pow(Math.max(yt,0.5),0.25)),d5i=d5f*12;
+  var La=Math.max(3*h+3*yt,6*d5f),Wa=L+2*h,ds=Math.max(1.04*Math.pow(Q/Math.max(L,1),0.6)*Math.pow(h,0.4)/Math.pow(d5,0.3)-yt,0);
+  document.getElementById('dr_res').style.display='block';
+  document.getElementById('dr_rv').innerHTML=ri('Brink Velocity',Vb.toFixed(2),'ft/s')+ri('Energy Head',(h+Vu*Vu/64.4).toFixed(2),'ft')+ri('Apron D50',d5i.toFixed(1),'in')+ri('NRCS Class',rrc(d5i),'')+ri('Apron Length La',La.toFixed(1),'ft')+ri('Apron Width Wa',Wa.toFixed(1),'ft')+ri('Est. Scour',ds.toFixed(2),'ft',ds>1?'wn':'');
+  document.getElementById('dr_no').innerHTML='Apron: '+La.toFixed(0)+'ft x '+Wa.toFixed(0)+'ft, D50='+d5i.toFixed(0)+'" ('+rrc(d5i)+'), thickness='+(Math.max(12,1.5*d5i)).toFixed(0)+'". Scour='+ds.toFixed(1)+' ft.';
+}
+
+</script>
+</body>
+</html>
